@@ -160,7 +160,7 @@ export default function Admin() {
                   Responsável
                 </label>
                 <Select
-                  value={filters.responsavel || ''}
+                  value={filters.responsavel || undefined}
                   onValueChange={(value) => setFilters({ responsavel: value || null })}
                 >
                   <SelectTrigger>

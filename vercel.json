@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/bitrix-proxy.ts": {
+    "pages/api/bitrix-proxy.ts": {
       "maxDuration": 30
     }
   },
