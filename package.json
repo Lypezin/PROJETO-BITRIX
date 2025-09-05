@@ -9,7 +9,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "setup": "tsx scripts/setup.ts",
-    "test-connection": "tsx scripts/test-connection.ts"
+    "test-connection": "tsx scripts/test-connection.ts",
+    "test-api": "node scripts/test-api.js"
   },
   "dependencies": {
     "react": "^18.2.0",
