@@ -116,11 +116,20 @@ class BitrixApiService {
       // Contar enviados total
       const enviadosResponse = await this.callBitrixMethod('crm.contact.list', {
         filter: filterEnviado,
-        select: ['ID'],
+        select: ['ID', CUSTOM_FIELDS.DATA_ENVIO],
         start: -1
       });
       metrics.totalEnviados = enviadosResponse.total || 0;
       console.log('Total enviados:', metrics.totalEnviados);
+      console.log('Resposta completa enviados:', enviadosResponse);
+      
+      // Debug: buscar alguns contatos para ver a estrutura dos dados
+      const debugResponse = await this.callBitrixMethod('crm.contact.list', {
+        select: ['ID', 'NAME', CUSTOM_FIELDS.DATA_ENVIO, CUSTOM_FIELDS.DATA_LIBERACAO],
+        start: 0,
+        order: { ID: 'DESC' }
+      });
+      console.log('Debug - Primeiros 5 contatos:', debugResponse.result?.slice(0, 5));
 
       // Contar liberados total
       const liberadosResponse = await this.callBitrixMethod('crm.contact.list', {

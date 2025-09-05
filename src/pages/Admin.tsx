@@ -17,7 +17,7 @@ export default function Admin() {
   });
 
   const responsaveis = [
-    { value: '', label: 'Todos os responsáveis' },
+    { value: 'all', label: 'Todos os responsáveis' },
     { value: 'Carolini Braguini', label: 'Carolini Braguini' },
     { value: 'Melissa', label: 'Melissa' },
     { value: 'Beatriz Angelo', label: 'Beatriz Angelo' },
@@ -169,8 +169,8 @@ export default function Admin() {
                   Responsável
                 </label>
                 <Select
-                  value={filters.responsavel || undefined}
-                  onValueChange={(value) => setFilters({ responsavel: value || null })}
+                  value={filters.responsavel || 'all'}
+                  onValueChange={(value) => setFilters({ responsavel: value === 'all' ? null : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um responsável" />
