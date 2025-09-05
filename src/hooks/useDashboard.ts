@@ -9,6 +9,7 @@ export const useDashboard = () => {
     isLoading, 
     lastUpdate,
     setData, 
+    setFilters,
     setLoading, 
     updateLastUpdate 
   } = useDashboardStore();
@@ -85,6 +86,7 @@ export const useDashboard = () => {
     filters,
     isLoading,
     lastUpdate,
+    setFilters,
     fetchData,
     exportData,
   };

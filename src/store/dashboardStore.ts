@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { format, startOfDay, endOfDay } from 'date-fns';
+import { startOfDay, endOfDay } from 'date-fns';
 
 export interface DashboardData {
   totalEnviados: number;

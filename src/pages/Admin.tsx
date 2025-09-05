@@ -5,10 +5,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useDashboard } from '../hooks/useDashboard';
 import { format, startOfDay, endOfDay, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Calendar, Download, Filter, RefreshCw } from 'lucide-react';
+import { Download, Filter, RefreshCw } from 'lucide-react';
 
 export default function Admin() {
-  const { filters, setFilters, exportData, isLoading, fetchData } = useDashboard();
+  const { filters, setFilters, exportData, isLoading } = useDashboard();
   const [dateRange, setDateRange] = useState({
     start: filters.startDate,
     end: filters.endDate,

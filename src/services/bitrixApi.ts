@@ -2,7 +2,6 @@ import axios from 'axios';
 import { 
   RESPONSIBLE_USERS, 
   CUSTOM_FIELDS, 
-  STATUS_VALUES, 
   createDateFilter,
   formatDateTimeForBitrix 
 } from '../config/bitrix';
@@ -65,7 +64,7 @@ class BitrixApiService {
       );
 
       // Comandos para cada responsável
-      Object.entries(RESPONSIBLE_USERS).forEach(([name, userId]) => {
+      Object.entries(RESPONSIBLE_USERS).forEach(([, userId]) => {
         batchCommands.push(
           this.createCountCommand('enviados', startDate, endDate, userId),
           this.createCountCommand('liberados', startDate, endDate, userId)
@@ -143,7 +142,7 @@ class BitrixApiService {
     const filter = createDateFilter(field, startDate, endDate);
     
     if (responsavelId) {
-      filter['ASSIGNED_BY_ID'] = responsavelId;
+      filter['ASSIGNED_BY_ID'] = responsavelId.toString();
     }
 
     return {
@@ -165,7 +164,7 @@ class BitrixApiService {
     };
 
     if (responsavelId) {
-      filter['ASSIGNED_BY_ID'] = responsavelId;
+      filter['ASSIGNED_BY_ID'] = responsavelId.toString();
     }
 
     return { filter };
