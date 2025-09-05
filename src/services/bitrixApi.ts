@@ -130,6 +130,44 @@ class BitrixApiService {
         order: { ID: 'DESC' }
       });
       console.log('Debug - Primeiros 5 contatos:', debugResponse.result?.slice(0, 5));
+      
+      // Debug: buscar contatos com datas para entender o formato
+      const debugWithDates = await this.callBitrixMethod('crm.contact.list', {
+        filter: {
+          [`!${CUSTOM_FIELDS.DATA_ENVIO}`]: null, // Contatos que TÊM data de envio
+        },
+        select: ['ID', 'NAME', CUSTOM_FIELDS.DATA_ENVIO, CUSTOM_FIELDS.DATA_LIBERACAO],
+        start: 0,
+        order: { ID: 'DESC' }
+      });
+      console.log('Debug - Contatos COM datas de envio:', debugWithDates.result?.slice(0, 3));
+      
+      // Debug: buscar contatos com datas de liberação
+      const debugWithLiberacao = await this.callBitrixMethod('crm.contact.list', {
+        filter: {
+          [`!${CUSTOM_FIELDS.DATA_LIBERACAO}`]: null, // Contatos que TÊM data de liberação
+        },
+        select: ['ID', 'NAME', CUSTOM_FIELDS.DATA_ENVIO, CUSTOM_FIELDS.DATA_LIBERACAO],
+        start: 0,
+        order: { ID: 'DESC' }
+      });
+      console.log('Debug - Contatos COM datas de liberação:', debugWithLiberacao.result?.slice(0, 3));
+      
+      // Debug: testar filtro mais amplo (últimos 30 dias)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const debugWideFilter = buildApiDateFilter(
+        { from: thirtyDaysAgo, to: new Date() }, 
+        CUSTOM_FIELDS.DATA_ENVIO
+      );
+      console.log('Debug - Filtro amplo (30 dias):', debugWideFilter);
+      
+      const debugWideResponse = await this.callBitrixMethod('crm.contact.list', {
+        filter: debugWideFilter,
+        select: ['ID', 'NAME', CUSTOM_FIELDS.DATA_ENVIO],
+        start: -1
+      });
+      console.log('Debug - Total com filtro amplo:', debugWideResponse.total);
 
       // Contar liberados total
       const liberadosResponse = await this.callBitrixMethod('crm.contact.list', {
