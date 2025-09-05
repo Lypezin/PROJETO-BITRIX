@@ -164,28 +164,6 @@ class BitrixApiService {
     }
   }
 
-  // Criar comando de contagem para batch
-  private createCountCommand(
-    type: 'enviados' | 'liberados', 
-    startDate: Date, 
-    endDate: Date, 
-    responsavelId?: number
-  ) {
-    const field = type === 'enviados' ? CUSTOM_FIELDS.DATA_ENVIO : CUSTOM_FIELDS.DATA_LIBERACAO;
-    const filter = createDateFilter(field, startDate, endDate);
-    
-    if (responsavelId) {
-      filter['ASSIGNED_BY_ID'] = responsavelId.toString();
-    }
-
-    return {
-      [`crm.contact.list.${type}${responsavelId ? `.${responsavelId}` : ''}`]: {
-        filter,
-        select: ['ID'],
-        start: -1
-      }
-    };
-  }
 
   // Criar filtro de data para o Bitrix24
   private createDateFilter(field: string, startDate: Date, endDate: Date) {
@@ -214,54 +192,6 @@ class BitrixApiService {
     return { filter };
   }
 
-  // Parsear resposta do batch
-  private parseBatchResponse(batchResult: any, responsaveisNames: string[]): DashboardMetrics {
-    const metrics: DashboardMetrics = {
-      totalEnviados: 0,
-      totalLiberados: 0,
-      responsaveis: {}
-    };
-
-    // Inicializar responsáveis
-    responsaveisNames.forEach(name => {
-      metrics.responsaveis[name] = { enviados: 0, liberados: 0 };
-    });
-
-    // Processar resultados do batch
-    Object.entries(batchResult).forEach(([key, value]: [string, any]) => {
-      const count = value?.total || 0;
-      
-      if (key.includes('enviados')) {
-        if (key.includes('.')) {
-          // É de um responsável específico
-          const responsavelId = key.split('.').pop();
-          const responsavelName = Object.entries(RESPONSIBLE_USERS)
-            .find(([, id]) => id.toString() === responsavelId)?.[0];
-          if (responsavelName) {
-            metrics.responsaveis[responsavelName].enviados = count;
-          }
-        } else {
-          // Total geral
-          metrics.totalEnviados = count;
-        }
-      } else if (key.includes('liberados')) {
-        if (key.includes('.')) {
-          // É de um responsável específico
-          const responsavelId = key.split('.').pop();
-          const responsavelName = Object.entries(RESPONSIBLE_USERS)
-            .find(([, id]) => id.toString() === responsavelId)?.[0];
-          if (responsavelName) {
-            metrics.responsaveis[responsavelName].liberados = count;
-          }
-        } else {
-          // Total geral
-          metrics.totalLiberados = count;
-        }
-      }
-    });
-
-    return metrics;
-  }
 
   // Chamada genérica para métodos do Bitrix24
   private async callBitrixMethod(method: string, params: any = {}) {
