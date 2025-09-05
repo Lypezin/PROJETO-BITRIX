@@ -81,6 +81,11 @@ export const useDashboard = () => {
     return () => clearInterval(interval);
   }, [fetchData]);
 
+  // Efeito para reagir a mudanças de filtro do admin
+  useEffect(() => {
+    fetchData();
+  }, [filters.startDate, filters.endDate, filters.responsavel]);
+
   return {
     data,
     filters,

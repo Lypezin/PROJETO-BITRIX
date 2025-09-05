@@ -1,9 +1,25 @@
 import axios from 'axios';
 import { 
   RESPONSIBLE_USERS, 
-  CUSTOM_FIELDS, 
-  formatDateTimeForBitrix 
+  CUSTOM_FIELDS
 } from '../config/bitrix';
+
+/**
+ * **A CORREÇÃO PRINCIPAL**
+ * Formata um objeto Date para a string 'DD/MM/YYYY HH:MM:SS',
+ * que é o formato correto para os filtros de campos de data personalizados do Bitrix.
+ */
+const formatDateForBitrix = (date: Date): string => {
+  const pad = (num: number) => num.toString().padStart(2, '0');
+  const d = new Date(date);
+  const dia = pad(d.getDate());
+  const mes = pad(d.getMonth() + 1);
+  const ano = d.getFullYear();
+  const horas = pad(d.getHours());
+  const minutos = pad(d.getMinutes());
+  const segundos = pad(d.getSeconds());
+  return `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
+};
 
 export interface ContactData {
   ID: string;
@@ -67,20 +83,28 @@ class BitrixApiService {
       });
 
       // Contar enviados total
+      const enviadosFilter = this.createDateFilter(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate);
+      console.log('Filtro de enviados:', enviadosFilter);
+      
       const enviadosResponse = await this.callBitrixMethod('crm.contact.list', {
-        filter: this.createDateFilter(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate),
+        filter: enviadosFilter,
         select: ['ID'],
         start: -1
       });
       metrics.totalEnviados = enviadosResponse.total || 0;
+      console.log('Total enviados:', metrics.totalEnviados);
 
       // Contar liberados total
+      const liberadosFilter = this.createDateFilter(CUSTOM_FIELDS.DATA_LIBERACAO, startDate, endDate);
+      console.log('Filtro de liberados:', liberadosFilter);
+      
       const liberadosResponse = await this.callBitrixMethod('crm.contact.list', {
-        filter: this.createDateFilter(CUSTOM_FIELDS.DATA_LIBERACAO, startDate, endDate),
+        filter: liberadosFilter,
         select: ['ID'],
         start: -1
       });
       metrics.totalLiberados = liberadosResponse.total || 0;
+      console.log('Total liberados:', metrics.totalLiberados);
 
       // Contar por responsável
       for (const [name, userId] of Object.entries(RESPONSIBLE_USERS)) {
@@ -166,8 +190,8 @@ class BitrixApiService {
 
   // Criar filtro de data para o Bitrix24
   private createDateFilter(field: string, startDate: Date, endDate: Date) {
-    const start = formatDateTimeForBitrix(startDate);
-    const end = formatDateTimeForBitrix(endDate);
+    const start = formatDateForBitrix(startDate);
+    const end = formatDateForBitrix(endDate);
     
     return {
       [`>=${field}`]: start,
@@ -180,8 +204,8 @@ class BitrixApiService {
     const filter: any = {
       ...this.createDateFilter(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate),
       'LOGIC': 'OR',
-      [`>=${CUSTOM_FIELDS.DATA_LIBERACAO}`]: formatDateTimeForBitrix(startDate),
-      [`<=${CUSTOM_FIELDS.DATA_LIBERACAO}`]: formatDateTimeForBitrix(endDate),
+      [`>=${CUSTOM_FIELDS.DATA_LIBERACAO}`]: formatDateForBitrix(startDate),
+      [`<=${CUSTOM_FIELDS.DATA_LIBERACAO}`]: formatDateForBitrix(endDate),
     };
 
     if (responsavelId) {
