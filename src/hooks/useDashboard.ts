@@ -18,15 +18,41 @@ export const useDashboard = () => {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const metrics = await bitrixApi.getDashboardMetrics(filters.startDate, filters.endDate);
+      
+      // **LÓGICA CORRIGIDA PARA USAR O FILTRO DO ADMIN OU O PADRÃO "HOJE"**
+      let startDate: Date;
+      let endDate: Date;
+      
+      if (filters.startDate && filters.endDate) {
+        startDate = filters.startDate;
+        endDate = filters.endDate;
+        console.log('Usando filtro do admin:', { startDate, endDate });
+      } else {
+        const today = new Date();
+        startDate = today;
+        endDate = today;
+        console.log('Usando filtro padrão (hoje):', { startDate, endDate });
+      }
+
+      console.log('Buscando dados para:', { startDate, endDate, responsavel: filters.responsavel });
+
+      const metrics = await bitrixApi.getDashboardMetrics(startDate, endDate);
+      
+      console.log('Métricas recebidas:', metrics);
+      
       setData(metrics);
       updateLastUpdate();
     } catch (error) {
       console.error('Erro ao buscar dados do dashboard:', error);
+      setData({
+        totalEnviados: 0,
+        totalLiberados: 0,
+        responsaveis: {}
+      });
     } finally {
       setLoading(false);
     }
-  }, [filters.startDate, filters.endDate, setData, setLoading, updateLastUpdate]);
+  }, [filters.startDate, filters.endDate, filters.responsavel, setData, setLoading, updateLastUpdate]);
 
   // Função para exportar dados
   const exportData = useCallback(async () => {

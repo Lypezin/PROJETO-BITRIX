@@ -13,16 +13,35 @@ import {
 const formatDateForBitrix = (date: Date): string => {
   const pad = (num: number) => num.toString().padStart(2, '0');
   const d = new Date(date);
-  
   const ano = d.getFullYear();
   const mes = pad(d.getMonth() + 1);
   const dia = pad(d.getDate());
-  
   const horas = pad(d.getHours());
   const minutos = pad(d.getMinutes());
   const segundos = pad(d.getSeconds());
-  
   return `${ano}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
+};
+
+/**
+ * Constrói um objeto de filtro de intervalo de datas para a API
+ * usando a lógica de "menor que o dia seguinte" para máxima precisão.
+ */
+export const buildApiDateFilter = (dateRange: { from: Date; to?: Date }, fieldId: string) => {
+  if (!dateRange.from) return {};
+
+  const start = new Date(dateRange.from);
+  start.setHours(0, 0, 0, 0);
+
+  const end = dateRange.to ? new Date(dateRange.to) : new Date(dateRange.from);
+  // Pega o dia seguinte à data final e define para o início do dia
+  const nextDayStart = new Date(end);
+  nextDayStart.setDate(nextDayStart.getDate() + 1);
+  nextDayStart.setHours(0, 0, 0, 0);
+
+  return {
+    [`>=${fieldId}`]: formatDateForBitrix(start),
+    [`<${fieldId}`]: formatDateForBitrix(nextDayStart), // Usa "<" (menor que) o início do próximo dia
+  };
 };
 
 export interface ContactData {
@@ -71,10 +90,18 @@ class BitrixApiService {
     }
   }
 
-  // Obter métricas do dashboard (otimizado com batch)
+  // Obter métricas do dashboard usando a nova lógica de data
   async getDashboardMetrics(startDate: Date, endDate: Date): Promise<DashboardMetrics> {
     try {
-      // Usar método direto em vez de batch para evitar problemas
+      const dateRange = { from: startDate, to: endDate };
+      
+      // Usar a nova função buildApiDateFilter
+      const filterEnviado = buildApiDateFilter(dateRange, CUSTOM_FIELDS.DATA_ENVIO);
+      const filterLiberado = buildApiDateFilter(dateRange, CUSTOM_FIELDS.DATA_LIBERACAO);
+      
+      console.log('Filtro de enviados (nova lógica):', filterEnviado);
+      console.log('Filtro de liberados (nova lógica):', filterLiberado);
+
       const metrics: DashboardMetrics = {
         totalEnviados: 0,
         totalLiberados: 0,
@@ -87,11 +114,8 @@ class BitrixApiService {
       });
 
       // Contar enviados total
-      const enviadosFilter = this.createDateFilter(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate);
-      console.log('Filtro de enviados:', enviadosFilter);
-      
       const enviadosResponse = await this.callBitrixMethod('crm.contact.list', {
-        filter: enviadosFilter,
+        filter: filterEnviado,
         select: ['ID'],
         start: -1
       });
@@ -99,11 +123,8 @@ class BitrixApiService {
       console.log('Total enviados:', metrics.totalEnviados);
 
       // Contar liberados total
-      const liberadosFilter = this.createDateFilter(CUSTOM_FIELDS.DATA_LIBERACAO, startDate, endDate);
-      console.log('Filtro de liberados:', liberadosFilter);
-      
       const liberadosResponse = await this.callBitrixMethod('crm.contact.list', {
-        filter: liberadosFilter,
+        filter: filterLiberado,
         select: ['ID'],
         start: -1
       });
@@ -115,7 +136,7 @@ class BitrixApiService {
         // Enviados por responsável
         const enviadosResp = await this.callBitrixMethod('crm.contact.list', {
           filter: {
-            ...this.createDateFilter(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate),
+            ...filterEnviado,
             'ASSIGNED_BY_ID': userId.toString()
           },
           select: ['ID'],
@@ -126,7 +147,7 @@ class BitrixApiService {
         // Liberados por responsável
         const liberadosResp = await this.callBitrixMethod('crm.contact.list', {
           filter: {
-            ...this.createDateFilter(CUSTOM_FIELDS.DATA_LIBERACAO, startDate, endDate),
+            ...filterLiberado,
             'ASSIGNED_BY_ID': userId.toString()
           },
           select: ['ID'],
