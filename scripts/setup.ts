@@ -1,11 +1,33 @@
-import { bitrixApi } from '../services/bitrixApi';
+import axios from 'axios';
 
 // Script para descoberta inicial de IDs do Bitrix24
-export const setupBitrixIds = async () => {
+const setupBitrixIds = async () => {
   try {
     console.log('🔍 Iniciando descoberta de IDs do Bitrix24...');
     
-    const { users, fields } = await bitrixApi.discoverIds();
+    const webhookUrl = process.env.BITRIX_WEBHOOK_URL;
+    if (!webhookUrl) {
+      console.error('❌ BITRIX_WEBHOOK_URL não configurada');
+      return;
+    }
+
+    // Buscar usuários
+    const usersResponse = await axios.post(webhookUrl, {
+      method: 'user.search',
+      params: {
+        ACTIVE: 'Y',
+        ADMIN: 'N'
+      }
+    });
+
+    // Buscar campos personalizados
+    const fieldsResponse = await axios.post(webhookUrl, {
+      method: 'crm.contact.fields',
+      params: {}
+    });
+    
+    const users = usersResponse.data.result;
+    const fields = fieldsResponse.data.result;
     
     console.log('👥 Usuários encontrados:');
     Object.entries(users).forEach(([id, user]: [string, any]) => {
@@ -78,13 +100,25 @@ export const setupBitrixIds = async () => {
 };
 
 // Função para testar a conexão
-export const testConnection = async () => {
+const testConnection = async () => {
   try {
     console.log('🔌 Testando conexão com Bitrix24...');
     
-    const response = await bitrixApi.discoverIds();
+    const webhookUrl = process.env.BITRIX_WEBHOOK_URL;
+    if (!webhookUrl) {
+      console.error('❌ BITRIX_WEBHOOK_URL não configurada');
+      return false;
+    }
+
+    const response = await axios.post(webhookUrl, {
+      method: 'user.search',
+      params: {
+        ACTIVE: 'Y',
+        ADMIN: 'N'
+      }
+    });
     
-    if (response.users && response.fields) {
+    if (response.data.result) {
       console.log('✅ Conexão estabelecida com sucesso!');
       return true;
     } else {
@@ -96,3 +130,10 @@ export const testConnection = async () => {
     return false;
   }
 };
+
+// Executar se chamado diretamente
+if (require.main === module) {
+  setupBitrixIds();
+}
+
+export { setupBitrixIds, testConnection };
