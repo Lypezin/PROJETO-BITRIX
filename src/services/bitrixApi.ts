@@ -5,20 +5,24 @@ import {
 } from '../config/bitrix';
 
 /**
- * **A CORREÇÃO PRINCIPAL**
- * Formata um objeto Date para a string 'DD/MM/YYYY HH:MM:SS',
- * que é o formato correto para os filtros de campos de data personalizados do Bitrix.
+ * **VERSÃO FINAL E CORRIGIDA**
+ * Formata um objeto Date para a string 'YYYY-MM-DD HH:MM:SS',
+ * o formato mais compatível para filtros de data em APIs.
+ * @param date O objeto de data a ser formatado.
  */
 const formatDateForBitrix = (date: Date): string => {
   const pad = (num: number) => num.toString().padStart(2, '0');
   const d = new Date(date);
-  const dia = pad(d.getDate());
-  const mes = pad(d.getMonth() + 1);
+  
   const ano = d.getFullYear();
+  const mes = pad(d.getMonth() + 1);
+  const dia = pad(d.getDate());
+  
   const horas = pad(d.getHours());
   const minutos = pad(d.getMinutes());
   const segundos = pad(d.getSeconds());
-  return `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
+  
+  return `${ano}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
 };
 
 export interface ContactData {
