@@ -2,7 +2,6 @@ import axios from 'axios';
 import { 
   RESPONSIBLE_USERS, 
   CUSTOM_FIELDS, 
-  createDateFilter,
   formatDateTimeForBitrix 
 } from '../config/bitrix';
 
