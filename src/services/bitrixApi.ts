@@ -55,27 +55,60 @@ class BitrixApiService {
   // Obter métricas do dashboard (otimizado com batch)
   async getDashboardMetrics(startDate: Date, endDate: Date): Promise<DashboardMetrics> {
     try {
-      const batchCommands = [];
-      
-      // Comandos para contagem total de enviados e liberados
-      batchCommands.push(
-        this.createCountCommand('enviados', startDate, endDate),
-        this.createCountCommand('liberados', startDate, endDate)
-      );
+      // Usar método direto em vez de batch para evitar problemas
+      const metrics: DashboardMetrics = {
+        totalEnviados: 0,
+        totalLiberados: 0,
+        responsaveis: {}
+      };
 
-      // Comandos para cada responsável
-      Object.entries(RESPONSIBLE_USERS).forEach(([, userId]) => {
-        batchCommands.push(
-          this.createCountCommand('enviados', startDate, endDate, userId),
-          this.createCountCommand('liberados', startDate, endDate, userId)
-        );
+      // Inicializar responsáveis
+      Object.keys(RESPONSIBLE_USERS).forEach(name => {
+        metrics.responsaveis[name] = { enviados: 0, liberados: 0 };
       });
 
-      const response = await this.callBitrixMethod('batch', {
-        cmd: batchCommands
+      // Contar enviados total
+      const enviadosResponse = await this.callBitrixMethod('crm.contact.list', {
+        filter: this.createDateFilter(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate),
+        select: ['ID'],
+        start: -1
       });
+      metrics.totalEnviados = enviadosResponse.total || 0;
 
-      return this.parseBatchResponse(response.result, Object.keys(RESPONSIBLE_USERS));
+      // Contar liberados total
+      const liberadosResponse = await this.callBitrixMethod('crm.contact.list', {
+        filter: this.createDateFilter(CUSTOM_FIELDS.DATA_LIBERACAO, startDate, endDate),
+        select: ['ID'],
+        start: -1
+      });
+      metrics.totalLiberados = liberadosResponse.total || 0;
+
+      // Contar por responsável
+      for (const [name, userId] of Object.entries(RESPONSIBLE_USERS)) {
+        // Enviados por responsável
+        const enviadosResp = await this.callBitrixMethod('crm.contact.list', {
+          filter: {
+            ...this.createDateFilter(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate),
+            'ASSIGNED_BY_ID': userId.toString()
+          },
+          select: ['ID'],
+          start: -1
+        });
+        metrics.responsaveis[name].enviados = enviadosResp.total || 0;
+
+        // Liberados por responsável
+        const liberadosResp = await this.callBitrixMethod('crm.contact.list', {
+          filter: {
+            ...this.createDateFilter(CUSTOM_FIELDS.DATA_LIBERACAO, startDate, endDate),
+            'ASSIGNED_BY_ID': userId.toString()
+          },
+          select: ['ID'],
+          start: -1
+        });
+        metrics.responsaveis[name].liberados = liberadosResp.total || 0;
+      }
+
+      return metrics;
     } catch (error) {
       console.error('Erro ao obter métricas do dashboard:', error);
       throw error;
@@ -154,10 +187,21 @@ class BitrixApiService {
     };
   }
 
+  // Criar filtro de data para o Bitrix24
+  private createDateFilter(field: string, startDate: Date, endDate: Date) {
+    const start = formatDateTimeForBitrix(startDate);
+    const end = formatDateTimeForBitrix(endDate);
+    
+    return {
+      [`>=${field}`]: start,
+      [`<=${field}`]: end,
+    };
+  }
+
   // Criar filtro para busca de contatos
   private createContactFilter(startDate: Date, endDate: Date, responsavelId?: number) {
     const filter: any = {
-      ...createDateFilter(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate),
+      ...this.createDateFilter(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate),
       'LOGIC': 'OR',
       [`>=${CUSTOM_FIELDS.DATA_LIBERACAO}`]: formatDateTimeForBitrix(startDate),
       [`<=${CUSTOM_FIELDS.DATA_LIBERACAO}`]: formatDateTimeForBitrix(endDate),

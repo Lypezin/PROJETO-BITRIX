@@ -1,7 +1,6 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
-import axios from 'axios';
+const axios = require('axios');
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async (req, res) => {
   // Configurar CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -30,6 +29,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: 'Webhook URL not configured' });
     }
 
+    console.log('Chamando Bitrix24:', method, 'com URL:', webhookUrl);
+
     // Fazer a chamada para o Bitrix24
     const response = await axios.post(webhookUrl, {
       method,
@@ -41,11 +42,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     });
 
+    console.log('Resposta do Bitrix24:', response.status);
+
     // Retornar a resposta do Bitrix24
     return res.status(200).json(response.data);
 
-  } catch (error: any) {
-    console.error('Erro na API proxy:', error);
+  } catch (error) {
+    console.error('Erro na API proxy:', error.message);
     console.error('Webhook URL configurada:', !!process.env.BITRIX_WEBHOOK_URL);
     
     if (error.response) {
@@ -72,4 +75,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
   }
-}
+};
