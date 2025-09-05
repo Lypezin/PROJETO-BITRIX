@@ -46,9 +46,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   } catch (error: any) {
     console.error('Erro na API proxy:', error);
+    console.error('Webhook URL configurada:', !!process.env.BITRIX_WEBHOOK_URL);
     
     if (error.response) {
       // Erro da API do Bitrix24
+      console.error('Erro do Bitrix24:', error.response.data);
       return res.status(error.response.status).json({
         error: error.response.data?.error || 'Erro na API do Bitrix24',
         error_description: error.response.data?.error_description || error.message
@@ -61,9 +63,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     } else {
       // Erro interno
+      console.error('Erro interno:', error.message);
       return res.status(500).json({
         error: 'internal_error',
-        error_description: 'Erro interno do servidor'
+        error_description: process.env.BITRIX_WEBHOOK_URL 
+          ? 'Erro interno do servidor' 
+          : 'Webhook URL não configurada'
       });
     }
   }
