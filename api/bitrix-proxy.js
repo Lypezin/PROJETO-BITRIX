@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-export default async (req, res) => {
+// O nome da variável de ambiente como está cadastrado na Vercel
+// SEM o prefixo VITE_
+const BITRIX_WEBHOOK_URL = process.env.BITRIX_WEBHOOK_URL;
+
+export default async function handler(req, res) {
   // Configurar CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -10,69 +14,45 @@ export default async (req, res) => {
     return res.status(200).end();
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  // Verificação de segurança básica: garantir que a variável de ambiente existe
+  if (!BITRIX_WEBHOOK_URL) {
+    console.error('ERRO GRAVE: Variável de ambiente BITRIX_WEBHOOK_URL não encontrada!');
+    return res.status(500).json({ error: 'Configuração do servidor incompleta.' });
   }
 
+  // Permite apenas métodos POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: `Método ${req.method} não é permitido. Use POST.` });
+  }
+  
+  const { method, params } = req.body;
+
+  if (!method) {
+    return res.status(400).json({ error: 'O "method" da API do Bitrix não foi fornecido no corpo da requisição.' });
+  }
+  
+  const apiUrl = `${BITRIX_WEBHOOK_URL}${method}`;
+  
   try {
-    const { method, params } = req.body;
-
-    if (!method) {
-      return res.status(400).json({ error: 'Method is required' });
-    }
-
-    // URL do webhook do Bitrix24 (armazenada como variável de ambiente)
-    const webhookUrl = process.env.BITRIX_WEBHOOK_URL;
+    console.log('Chamando Bitrix24:', method, 'com URL:', apiUrl);
     
-    if (!webhookUrl) {
-      console.error('BITRIX_WEBHOOK_URL não configurada');
-      return res.status(500).json({ error: 'Webhook URL not configured' });
-    }
-
-    console.log('Chamando Bitrix24:', method, 'com URL:', webhookUrl);
-
-    // Fazer a chamada para o Bitrix24
-    const response = await axios.post(webhookUrl, {
-      method,
-      params: params || {}
-    }, {
-      timeout: 30000, // 30 segundos de timeout
+    const bitrixResponse = await axios.post(apiUrl, params || {}, {
+      timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
       }
     });
-
-    console.log('Resposta do Bitrix24:', response.status);
-
-    // Retornar a resposta do Bitrix24
-    return res.status(200).json(response.data);
+    
+    console.log('Resposta do Bitrix24:', bitrixResponse.status);
+    
+    // Repassa a resposta do Bitrix para o frontend
+    res.status(200).json(bitrixResponse.data);
 
   } catch (error) {
-    console.error('Erro na API proxy:', error.message);
-    console.error('Webhook URL configurada:', !!process.env.BITRIX_WEBHOOK_URL);
-    
-    if (error.response) {
-      // Erro da API do Bitrix24
-      console.error('Erro do Bitrix24:', error.response.data);
-      return res.status(error.response.status).json({
-        error: error.response.data?.error || 'Erro na API do Bitrix24',
-        error_description: error.response.data?.error_description || error.message
-      });
-    } else if (error.code === 'ECONNABORTED') {
-      // Timeout
-      return res.status(408).json({
-        error: 'timeout',
-        error_description: 'Timeout na comunicação com o Bitrix24'
-      });
-    } else {
-      // Erro interno
-      console.error('Erro interno:', error.message);
-      return res.status(500).json({
-        error: 'internal_error',
-        error_description: process.env.BITRIX_WEBHOOK_URL 
-          ? 'Erro interno do servidor' 
-          : 'Webhook URL não configurada'
-      });
-    }
+    console.error('Erro ao chamar a API do Bitrix:', error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({ 
+        error: 'Erro ao se comunicar com a API do Bitrix.',
+        details: error.response?.data 
+    });
   }
-};
+}
