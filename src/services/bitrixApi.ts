@@ -84,7 +84,7 @@ class BitrixApiService {
   }
 
   // Obter métricas do dashboard usando a nova lógica de data
-  async getDashboardMetrics(startDate: Date, endDate: Date): Promise<DashboardMetrics> {
+  async getDashboardMetrics(_startDate: Date, _endDate: Date): Promise<DashboardMetrics> {
     try {
       // TEMPORÁRIO: Testar com data onde sabemos que há dados (8 de setembro)
       const testDate = new Date('2025-09-08T00:00:00-03:00');
