@@ -11,15 +11,8 @@ import {
  * @param date O objeto de data a ser formatado.
  */
 const formatDateForBitrix = (date: Date): string => {
-  const pad = (num: number) => num.toString().padStart(2, '0');
-  const d = new Date(date);
-  const ano = d.getFullYear();
-  const mes = pad(d.getMonth() + 1);
-  const dia = pad(d.getDate());
-  const horas = pad(d.getHours());
-  const minutos = pad(d.getMinutes());
-  const segundos = pad(d.getSeconds());
-  return `${ano}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
+  // Usar formato ISO 8601 com timezone (como o Bitrix usa)
+  return date.toISOString();
 };
 
 /**
@@ -196,6 +189,18 @@ class BitrixApiService {
         start: -1
       });
       console.log('Debug - Total com filtro amplo:', debugWideResponse.total);
+      
+      // Debug: testar com data correta (8 de setembro) onde sabemos que há dados
+      const testDate = new Date('2025-09-08T00:00:00-03:00'); // 8 de setembro
+      const testFilter = buildApiDateFilter({ from: testDate, to: testDate }, CUSTOM_FIELDS.DATA_ENVIO);
+      console.log('Debug - Teste com data correta (8/09):', JSON.stringify(testFilter, null, 2));
+      
+      const testResponse = await this.callBitrixMethod('crm.contact.list', {
+        filter: testFilter,
+        select: ['ID', 'NAME', CUSTOM_FIELDS.DATA_ENVIO],
+        start: -1
+      });
+      console.log('Debug - Total com data correta (8/09):', testResponse.total);
       
       // Debug: testar sem filtro de data para ver todos os contatos
       const debugNoFilter = await this.callBitrixMethod('crm.contact.list', {
