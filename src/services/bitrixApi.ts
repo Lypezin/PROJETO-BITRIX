@@ -86,8 +86,6 @@ class BitrixApiService {
   // Obter métricas do dashboard usando a nova lógica de data
   async getDashboardMetrics(startDate: Date, endDate: Date): Promise<DashboardMetrics> {
     try {
-      const dateRange = { from: startDate, to: endDate };
-      
       // TEMPORÁRIO: Testar com data onde sabemos que há dados (8 de setembro)
       const testDate = new Date('2025-09-08T00:00:00-03:00');
       const filterEnviado = buildApiDateFilter({ from: testDate, to: testDate }, CUSTOM_FIELDS.DATA_ENVIO);
@@ -194,8 +192,8 @@ class BitrixApiService {
       console.log('Debug - Total com filtro amplo:', debugWideResponse.total);
       
       // Debug: testar com data correta (8 de setembro) onde sabemos que há dados
-      const testDate = new Date('2025-09-08T00:00:00-03:00'); // 8 de setembro
-      const testFilter = buildApiDateFilter({ from: testDate, to: testDate }, CUSTOM_FIELDS.DATA_ENVIO);
+      const debugTestDate = new Date('2025-09-08T00:00:00-03:00'); // 8 de setembro
+      const testFilter = buildApiDateFilter({ from: debugTestDate, to: debugTestDate }, CUSTOM_FIELDS.DATA_ENVIO);
       console.log('Debug - Teste com data correta (8/09):', JSON.stringify(testFilter, null, 2));
       
       const testResponse = await this.callBitrixMethod('crm.contact.list', {

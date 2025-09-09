@@ -1,0 +1,5 @@
+[33m526673d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Fix: Change date format to ISO 8601 and test with correct date (8th September) where data exists
+[33m3d4c1c2[m Debug: Add more direct logging to see actual data structure and force deployment update
+[33mbe299f0[m Debug: Expand logs with JSON.stringify to see actual data structure and date formats
+[33m0089968[m Debug: Add detailed date format investigation to understand how dates are stored in Bitrix24
+[33m651f738[m Debug: Add comprehensive data investigation to understand date formats and find actual data
