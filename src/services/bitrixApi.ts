@@ -89,12 +89,13 @@ class BitrixApiService {
   // Obter métricas do dashboard usando a nova lógica de data
   async getDashboardMetrics(_startDate: Date, _endDate: Date): Promise<DashboardMetrics> {
     try {
-      // CORREÇÃO: Usar data onde sabemos que há dados (8 de setembro) com formato correto
+      // TESTE: Usar data 08 de setembro onde sabemos que há dados
       const testDate = new Date('2025-09-08T00:00:00-03:00');
-      const filterEnviado = buildApiDateFilter({ from: testDate, to: testDate }, CUSTOM_FIELDS.DATA_ENVIO);
-      const filterLiberado = buildApiDateFilter({ from: testDate, to: testDate }, CUSTOM_FIELDS.DATA_LIBERACAO);
+      const nextDay = new Date('2025-09-09T00:00:00-03:00');
+      const filterEnviado = buildApiDateFilter({ from: testDate, to: nextDay }, CUSTOM_FIELDS.DATA_ENVIO);
+      const filterLiberado = buildApiDateFilter({ from: testDate, to: nextDay }, CUSTOM_FIELDS.DATA_LIBERACAO);
       
-      console.log('🎯 TESTE: Testando com data 8/09 onde há dados - Formato simples YYYY-MM-DD');
+      console.log('🎯 TESTE: Testando com data 08/09 onde há dados - Formato simples YYYY-MM-DD');
       
       console.log('Filtro de enviados (nova lógica):', JSON.stringify(filterEnviado, null, 2));
       console.log('Filtro de liberados (nova lógica):', JSON.stringify(filterLiberado, null, 2));
