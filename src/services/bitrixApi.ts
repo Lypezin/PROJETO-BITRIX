@@ -142,6 +142,17 @@ class BitrixApiService {
       });
       console.log('Debug - Contatos COM datas de envio:', debugWithDates.result?.slice(0, 3));
       
+      // Debug: mostrar formato real das datas
+      if (debugWithDates.result && debugWithDates.result.length > 0) {
+        const firstContact = debugWithDates.result[0];
+        console.log('Debug - Formato real da data de envio:', {
+          ID: firstContact.ID,
+          NAME: firstContact.NAME,
+          DATA_ENVIO: firstContact[CUSTOM_FIELDS.DATA_ENVIO],
+          TIPO: typeof firstContact[CUSTOM_FIELDS.DATA_ENVIO]
+        });
+      }
+      
       // Debug: buscar contatos com datas de liberação
       const debugWithLiberacao = await this.callBitrixMethod('crm.contact.list', {
         filter: {
@@ -152,6 +163,17 @@ class BitrixApiService {
         order: { ID: 'DESC' }
       });
       console.log('Debug - Contatos COM datas de liberação:', debugWithLiberacao.result?.slice(0, 3));
+      
+      // Debug: mostrar formato real das datas de liberação
+      if (debugWithLiberacao.result && debugWithLiberacao.result.length > 0) {
+        const firstContact = debugWithLiberacao.result[0];
+        console.log('Debug - Formato real da data de liberação:', {
+          ID: firstContact.ID,
+          NAME: firstContact.NAME,
+          DATA_LIBERACAO: firstContact[CUSTOM_FIELDS.DATA_LIBERACAO],
+          TIPO: typeof firstContact[CUSTOM_FIELDS.DATA_LIBERACAO]
+        });
+      }
       
       // Debug: testar filtro mais amplo (últimos 30 dias)
       const thirtyDaysAgo = new Date();
@@ -168,6 +190,23 @@ class BitrixApiService {
         start: -1
       });
       console.log('Debug - Total com filtro amplo:', debugWideResponse.total);
+      
+      // Debug: testar sem filtro de data para ver todos os contatos
+      const debugNoFilter = await this.callBitrixMethod('crm.contact.list', {
+        select: ['ID', 'NAME', CUSTOM_FIELDS.DATA_ENVIO, CUSTOM_FIELDS.DATA_LIBERACAO],
+        start: 0,
+        order: { ID: 'DESC' }
+      });
+      console.log('Debug - Total de contatos (sem filtro):', debugNoFilter.total);
+      if (debugNoFilter.result && debugNoFilter.result.length > 0) {
+        const firstContact = debugNoFilter.result[0];
+        console.log('Debug - Primeiro contato (sem filtro):', {
+          ID: firstContact.ID,
+          NAME: firstContact.NAME,
+          DATA_ENVIO: firstContact[CUSTOM_FIELDS.DATA_ENVIO],
+          DATA_LIBERACAO: firstContact[CUSTOM_FIELDS.DATA_LIBERACAO]
+        });
+      }
 
       // Contar liberados total
       const liberadosResponse = await this.callBitrixMethod('crm.contact.list', {
