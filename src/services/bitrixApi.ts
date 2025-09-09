@@ -15,8 +15,8 @@ const formatDateForBitrix = (date: Date): string => {
   // Converter para timezone do Brasil (UTC-3) e formatar como +03:00
   const brazilDate = new Date(date.getTime() - (3 * 60 * 60 * 1000));
   const isoString = brazilDate.toISOString();
-  // Substituir Z por +03:00 para corresponder ao formato do Bitrix
-  return isoString.replace('Z', '+03:00');
+  // Substituir Z por +03:00 e remover milissegundos para corresponder ao formato do Bitrix
+  return isoString.replace('Z', '+03:00').replace(/\.\d{3}/, '');
 };
 
 /**
@@ -95,7 +95,7 @@ class BitrixApiService {
       const filterEnviado = buildApiDateFilter({ from: testDate, to: testDate }, CUSTOM_FIELDS.DATA_ENVIO);
       const filterLiberado = buildApiDateFilter({ from: testDate, to: testDate }, CUSTOM_FIELDS.DATA_LIBERACAO);
       
-      console.log('🎯 CORREÇÃO: Testando com data 8/09 onde há dados - Formato correto ISO 8601 com timezone +03:00');
+      console.log('🎯 CORREÇÃO: Testando com data 8/09 onde há dados - Formato correto ISO 8601 com timezone +03:00 (sem milissegundos)');
       
       console.log('Filtro de enviados (nova lógica):', JSON.stringify(filterEnviado, null, 2));
       console.log('Filtro de liberados (nova lógica):', JSON.stringify(filterLiberado, null, 2));
