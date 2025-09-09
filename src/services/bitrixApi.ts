@@ -91,10 +91,28 @@ class BitrixApi {
     const endDate = new Date(dateRange.to);
     endDate.setHours(23, 59, 59, 999);
     
-    return {
+    const filter = {
       [`>=${fieldId}`]: this.formatDateForBitrix(startDate),
       [`<=${fieldId}`]: this.formatDateForBitrix(endDate)
     };
+    
+    console.log(`🔍 Filtro construído para ${fieldId}:`, {
+      dateRange: {
+        from: dateRange.from.toISOString(),
+        to: dateRange.to.toISOString()
+      },
+      processedDates: {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString()
+      },
+      bitrixFormat: {
+        startFormatted: this.formatDateForBitrix(startDate),
+        endFormatted: this.formatDateForBitrix(endDate)
+      },
+      finalFilter: filter
+    });
+    
+    return filter;
   }
 
   // Obter métricas do dashboard usando filtros otimizados
@@ -103,6 +121,11 @@ class BitrixApi {
       console.log('🚀 Buscando métricas otimizadas para:', {
         startDate: startDate.toLocaleDateString(),
         endDate: endDate.toLocaleDateString()
+      });
+      
+      console.log('🔧 Configurações sendo usadas:', {
+        CUSTOM_FIELDS,
+        RESPONSIBLE_USERS
       });
       
       const metrics: DashboardMetrics = {
@@ -117,6 +140,32 @@ class BitrixApi {
       });
 
       const dateRange = { from: startDate, to: endDate };
+      
+      // TESTE: Primeiro fazer uma consulta simples para verificar se há dados
+      console.log('🧪 TESTE: Verificando se há dados no período...');
+      try {
+        const testFilter = this.buildDateFilter(dateRange, CUSTOM_FIELDS.DATA_ENVIO);
+        const testResponse = await this.callBitrixMethod('crm.contact.list', {
+          filter: testFilter,
+          select: ['ID'],
+          start: 0,
+          limit: 1
+        });
+        console.log('🧪 TESTE - Resposta da consulta simples:', testResponse);
+        
+        // Teste sem filtro de data para ver se há contatos com o campo
+        const testNoDateFilter = await this.callBitrixMethod('crm.contact.list', {
+          filter: {
+            [`!${CUSTOM_FIELDS.DATA_ENVIO}`]: false // Apenas contatos com o campo preenchido
+          },
+          select: ['ID', CUSTOM_FIELDS.DATA_ENVIO],
+          start: 0,
+          limit: 5
+        });
+        console.log('🧪 TESTE - Contatos com campo preenchido (amostra):', testNoDateFilter);
+      } catch (testError) {
+        console.error('🧪 TESTE - Erro na consulta simples:', testError);
+      }
       
       // Usar batch request para eficiência máxima
       const batchCommands: any = {
@@ -178,18 +227,30 @@ class BitrixApi {
       });
 
       console.log('Executando batch request com', Object.keys(batchCommands).length, 'comandos');
+      console.log('Comandos do batch:', JSON.stringify(batchCommands, null, 2));
       
       // Executar batch request
       const batchResponse = await this.callBitrixMethod('batch', {
         cmd: batchCommands
       });
 
-      console.log('Resposta do batch:', batchResponse);
+      console.log('Resposta do batch completa:', JSON.stringify(batchResponse, null, 2));
 
       if (batchResponse.result) {
+        console.log('Processando resultados do batch...');
+        
+        // Debug detalhado dos resultados
+        console.log('enviados_count result:', batchResponse.result.enviados_count);
+        console.log('liberados_count result:', batchResponse.result.liberados_count);
+        
         // Processar resultados
         metrics.totalEnviados = batchResponse.result.enviados_count?.total || 0;
         metrics.totalLiberados = batchResponse.result.liberados_count?.total || 0;
+
+        console.log('Totais extraídos:', {
+          totalEnviados: metrics.totalEnviados,
+          totalLiberados: metrics.totalLiberados
+        });
 
         // Processar por responsável
         Object.keys(RESPONSIBLE_USERS).forEach(name => {
@@ -197,9 +258,18 @@ class BitrixApi {
           const enviadosKey = `enviados_${keyName}`;
           const liberadosKey = `liberados_${keyName}`;
           
+          console.log(`Processando ${name}:`, {
+            enviadosKey,
+            liberadosKey,
+            enviadosResult: batchResponse.result[enviadosKey],
+            liberadosResult: batchResponse.result[liberadosKey]
+          });
+          
           metrics.responsaveis[name].enviados = batchResponse.result[enviadosKey]?.total || 0;
           metrics.responsaveis[name].liberados = batchResponse.result[liberadosKey]?.total || 0;
         });
+      } else {
+        console.error('❌ Nenhum resultado no batch response');
       }
 
       console.log('✅ Métricas calculadas:', metrics);
