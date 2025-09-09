@@ -141,6 +141,7 @@ class BitrixApiService {
         order: { ID: 'DESC' }
       });
       console.log('Debug - Contatos COM datas de envio:', JSON.stringify(debugWithDates.result?.slice(0, 3), null, 2));
+      console.log('Debug - Contatos COM datas de envio (simples):', debugWithDates.result?.slice(0, 3));
       
       // Debug: mostrar formato real das datas
       if (debugWithDates.result && debugWithDates.result.length > 0) {
@@ -151,6 +152,11 @@ class BitrixApiService {
           DATA_ENVIO: firstContact[CUSTOM_FIELDS.DATA_ENVIO],
           TIPO: typeof firstContact[CUSTOM_FIELDS.DATA_ENVIO]
         }, null, 2));
+        
+        // Log mais direto
+        console.log('Debug - Primeiro contato (dados brutos):', firstContact);
+        console.log('Debug - Data de envio (bruta):', firstContact[CUSTOM_FIELDS.DATA_ENVIO]);
+        console.log('Debug - Data de liberação (bruta):', firstContact[CUSTOM_FIELDS.DATA_LIBERACAO]);
       }
       
       // Debug: buscar contatos com datas de liberação
