@@ -169,61 +169,20 @@ class BitrixApi {
       
       // Usar batch request para eficiência máxima
       const batchCommands: any = {
-        // Contar enviados total
-        enviados_count: {
-          method: 'crm.contact.list',
-          params: {
-            filter: {
-              ...this.buildDateFilter(dateRange, CUSTOM_FIELDS.DATA_ENVIO),
-              [`!${CUSTOM_FIELDS.DATA_ENVIO}`]: false // Excluir campos vazios
-            },
-            select: ['ID'],
-            start: -1 // Só contar, não buscar dados
-          }
-        },
+        // Contar enviados total - usando cmd format correto
+        enviados_count: `crm.contact.list?filter[>=${CUSTOM_FIELDS.DATA_ENVIO}]=${this.formatDateForBitrix(new Date(dateRange.from))}&filter[<=${CUSTOM_FIELDS.DATA_ENVIO}]=${this.formatDateForBitrix(new Date(dateRange.to))}&filter[!${CUSTOM_FIELDS.DATA_ENVIO}]=false&select[]=ID&start=0&limit=1`,
+        
         // Contar liberados total
-        liberados_count: {
-          method: 'crm.contact.list',
-          params: {
-            filter: {
-              ...this.buildDateFilter(dateRange, CUSTOM_FIELDS.DATA_LIBERACAO),
-              [`!${CUSTOM_FIELDS.DATA_LIBERACAO}`]: false // Excluir campos vazios
-            },
-            select: ['ID'],
-            start: -1 // Só contar, não buscar dados
-          }
-        }
+        liberados_count: `crm.contact.list?filter[>=${CUSTOM_FIELDS.DATA_LIBERACAO}]=${this.formatDateForBitrix(new Date(dateRange.from))}&filter[<=${CUSTOM_FIELDS.DATA_LIBERACAO}]=${this.formatDateForBitrix(new Date(dateRange.to))}&filter[!${CUSTOM_FIELDS.DATA_LIBERACAO}]=false&select[]=ID&start=0&limit=1`
       };
 
       // Adicionar comandos para cada responsável
       Object.entries(RESPONSIBLE_USERS).forEach(([name, id]) => {
         // Enviados por responsável
-        batchCommands[`enviados_${name.replace(/\s+/g, '_')}`] = {
-          method: 'crm.contact.list',
-          params: {
-            filter: {
-              ...this.buildDateFilter(dateRange, CUSTOM_FIELDS.DATA_ENVIO),
-              [`!${CUSTOM_FIELDS.DATA_ENVIO}`]: false,
-              'ASSIGNED_BY_ID': id
-            },
-            select: ['ID'],
-            start: -1
-          }
-        };
-
+        batchCommands[`enviados_${name.replace(/\s+/g, '_')}`] = `crm.contact.list?filter[>=${CUSTOM_FIELDS.DATA_ENVIO}]=${this.formatDateForBitrix(new Date(dateRange.from))}&filter[<=${CUSTOM_FIELDS.DATA_ENVIO}]=${this.formatDateForBitrix(new Date(dateRange.to))}&filter[!${CUSTOM_FIELDS.DATA_ENVIO}]=false&filter[ASSIGNED_BY_ID]=${id}&select[]=ID&start=0&limit=1`;
+        
         // Liberados por responsável
-        batchCommands[`liberados_${name.replace(/\s+/g, '_')}`] = {
-          method: 'crm.contact.list',
-          params: {
-            filter: {
-              ...this.buildDateFilter(dateRange, CUSTOM_FIELDS.DATA_LIBERACAO),
-              [`!${CUSTOM_FIELDS.DATA_LIBERACAO}`]: false,
-              'ASSIGNED_BY_ID': id
-            },
-            select: ['ID'],
-            start: -1
-          }
-        };
+        batchCommands[`liberados_${name.replace(/\s+/g, '_')}`] = `crm.contact.list?filter[>=${CUSTOM_FIELDS.DATA_LIBERACAO}]=${this.formatDateForBitrix(new Date(dateRange.from))}&filter[<=${CUSTOM_FIELDS.DATA_LIBERACAO}]=${this.formatDateForBitrix(new Date(dateRange.to))}&filter[!${CUSTOM_FIELDS.DATA_LIBERACAO}]=false&filter[ASSIGNED_BY_ID]=${id}&select[]=ID&start=0&limit=1`;
       });
 
       console.log('Executando batch request com', Object.keys(batchCommands).length, 'comandos');
@@ -239,34 +198,37 @@ class BitrixApi {
       if (batchResponse.result) {
         console.log('Processando resultados do batch...');
         
-        // Debug detalhado dos resultados
-        console.log('enviados_count result:', batchResponse.result.enviados_count);
-        console.log('liberados_count result:', batchResponse.result.liberados_count);
+        // Com o novo formato, os resultados estão em result.result[index]
+        const results = batchResponse.result.result;
+        const totals = batchResponse.result.result_total;
         
-        // Processar resultados
-        metrics.totalEnviados = batchResponse.result.enviados_count?.total || 0;
-        metrics.totalLiberados = batchResponse.result.liberados_count?.total || 0;
+        console.log('Resultados arrays:', { results, totals });
+        
+        // Para comandos de string, o total está em result_total
+        if (totals && totals.length >= 2) {
+          metrics.totalEnviados = totals[0] || 0; // enviados_count é o primeiro comando
+          metrics.totalLiberados = totals[1] || 0; // liberados_count é o segundo comando
+        }
 
         console.log('Totais extraídos:', {
           totalEnviados: metrics.totalEnviados,
           totalLiberados: metrics.totalLiberados
         });
 
-        // Processar por responsável
+        // Processar por responsável - os resultados estão nas posições subsequentes
+        let index = 2; // Começar após enviados_count e liberados_count
         Object.keys(RESPONSIBLE_USERS).forEach(name => {
-          const keyName = name.replace(/\s+/g, '_');
-          const enviadosKey = `enviados_${keyName}`;
-          const liberadosKey = `liberados_${keyName}`;
-          
-          console.log(`Processando ${name}:`, {
-            enviadosKey,
-            liberadosKey,
-            enviadosResult: batchResponse.result[enviadosKey],
-            liberadosResult: batchResponse.result[liberadosKey]
+          console.log(`Processando ${name} (índices ${index} e ${index + 1}):`, {
+            enviadosTotal: totals ? totals[index] : 'undefined',
+            liberadosTotal: totals ? totals[index + 1] : 'undefined'
           });
           
-          metrics.responsaveis[name].enviados = batchResponse.result[enviadosKey]?.total || 0;
-          metrics.responsaveis[name].liberados = batchResponse.result[liberadosKey]?.total || 0;
+          if (totals) {
+            metrics.responsaveis[name].enviados = totals[index] || 0;
+            metrics.responsaveis[name].liberados = totals[index + 1] || 0;
+          }
+          
+          index += 2; // Cada responsável tem 2 comandos (enviados + liberados)
         });
       } else {
         console.error('❌ Nenhum resultado no batch response');
