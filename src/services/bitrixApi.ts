@@ -52,7 +52,7 @@ class BitrixApiService {
         if (userId) {
           filter += `&filter[ASSIGNED_BY_ID]=${userId}`;
         }
-        return `crm.contact.list?start=-1&${filter}`;
+        return `crm.contact.list?start=0&limit=1000&${filter}`;
       };
 
       commands['enviados_count'] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, testStartDate, testEndDate);
@@ -71,25 +71,33 @@ class BitrixApiService {
       console.log('✅ Resposta recebida:', response);
       console.log('🔍 Resposta completa detalhada:', JSON.stringify(response, null, 2));
       
+      // CORREÇÃO CRÍTICA: start=-1 não funciona, vamos contar os dados retornados
+      const batchResults = response.result.result;
       const resultTotals = response.result.result_total;
       
       console.log('🎯 Result totals recebidos:', resultTotals);
+      console.log('📊 Batch results recebidos:', batchResults);
 
+      // Contar dados reais em vez de usar result_total que não funciona
       const metrics: DashboardMetrics = {
-        totalEnviados: resultTotals.enviados_count || 0,
-        totalLiberados: resultTotals.liberados_count || 0,
+        totalEnviados: batchResults.enviados_count ? batchResults.enviados_count.length : 0,
+        totalLiberados: batchResults.liberados_count ? batchResults.liberados_count.length : 0,
         responsaveis: {}
       };
 
-      console.log('📈 Totais principais:', {
+      console.log('📈 Totais principais CORRIGIDOS:', {
         totalEnviados: metrics.totalEnviados,
         totalLiberados: metrics.totalLiberados
       });
 
+      // Contar por responsável
       for (const name of Object.keys(RESPONSIBLE_USERS)) {
+          const enviadosKey = `enviados_${name}`;
+          const liberadosKey = `liberados_${name}`;
+          
           metrics.responsaveis[name] = {
-              enviados: resultTotals[`enviados_${name}`] || 0,
-              liberados: resultTotals[`liberados_${name}`] || 0,
+              enviados: batchResults[enviadosKey] ? batchResults[enviadosKey].length : 0,
+              liberados: batchResults[liberadosKey] ? batchResults[liberadosKey].length : 0,
           };
       }
 
