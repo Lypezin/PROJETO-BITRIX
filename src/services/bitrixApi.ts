@@ -170,19 +170,19 @@ class BitrixApi {
       // Usar batch request para eficiência máxima
       const batchCommands: any = {
         // Contar enviados total - usando cmd format correto
-        enviados_count: `crm.contact.list?filter[>=${CUSTOM_FIELDS.DATA_ENVIO}]=${this.formatDateForBitrix(new Date(dateRange.from))}&filter[<=${CUSTOM_FIELDS.DATA_ENVIO}]=${this.formatDateForBitrix(new Date(dateRange.to))}&filter[!${CUSTOM_FIELDS.DATA_ENVIO}]=false&select[]=ID&start=0&limit=1`,
+        enviados_count: `crm.contact.list?filter[>=${CUSTOM_FIELDS.DATA_ENVIO}]=${this.formatDateForBitrix(new Date(dateRange.from))}&filter[<=${CUSTOM_FIELDS.DATA_ENVIO}]=${this.formatDateForBitrix(new Date(dateRange.to))}&filter[!${CUSTOM_FIELDS.DATA_ENVIO}]=false&start=-1`,
         
         // Contar liberados total
-        liberados_count: `crm.contact.list?filter[>=${CUSTOM_FIELDS.DATA_LIBERACAO}]=${this.formatDateForBitrix(new Date(dateRange.from))}&filter[<=${CUSTOM_FIELDS.DATA_LIBERACAO}]=${this.formatDateForBitrix(new Date(dateRange.to))}&filter[!${CUSTOM_FIELDS.DATA_LIBERACAO}]=false&select[]=ID&start=0&limit=1`
+        liberados_count: `crm.contact.list?filter[>=${CUSTOM_FIELDS.DATA_LIBERACAO}]=${this.formatDateForBitrix(new Date(dateRange.from))}&filter[<=${CUSTOM_FIELDS.DATA_LIBERACAO}]=${this.formatDateForBitrix(new Date(dateRange.to))}&filter[!${CUSTOM_FIELDS.DATA_LIBERACAO}]=false&start=-1`
       };
 
       // Adicionar comandos para cada responsável
       Object.entries(RESPONSIBLE_USERS).forEach(([name, id]) => {
         // Enviados por responsável
-        batchCommands[`enviados_${name.replace(/\s+/g, '_')}`] = `crm.contact.list?filter[>=${CUSTOM_FIELDS.DATA_ENVIO}]=${this.formatDateForBitrix(new Date(dateRange.from))}&filter[<=${CUSTOM_FIELDS.DATA_ENVIO}]=${this.formatDateForBitrix(new Date(dateRange.to))}&filter[!${CUSTOM_FIELDS.DATA_ENVIO}]=false&filter[ASSIGNED_BY_ID]=${id}&select[]=ID&start=0&limit=1`;
+        batchCommands[`enviados_${name.replace(/\s+/g, '_')}`] = `crm.contact.list?filter[>=${CUSTOM_FIELDS.DATA_ENVIO}]=${this.formatDateForBitrix(new Date(dateRange.from))}&filter[<=${CUSTOM_FIELDS.DATA_ENVIO}]=${this.formatDateForBitrix(new Date(dateRange.to))}&filter[!${CUSTOM_FIELDS.DATA_ENVIO}]=false&filter[ASSIGNED_BY_ID]=${id}&start=-1`;
         
         // Liberados por responsável
-        batchCommands[`liberados_${name.replace(/\s+/g, '_')}`] = `crm.contact.list?filter[>=${CUSTOM_FIELDS.DATA_LIBERACAO}]=${this.formatDateForBitrix(new Date(dateRange.from))}&filter[<=${CUSTOM_FIELDS.DATA_LIBERACAO}]=${this.formatDateForBitrix(new Date(dateRange.to))}&filter[!${CUSTOM_FIELDS.DATA_LIBERACAO}]=false&filter[ASSIGNED_BY_ID]=${id}&select[]=ID&start=0&limit=1`;
+        batchCommands[`liberados_${name.replace(/\s+/g, '_')}`] = `crm.contact.list?filter[>=${CUSTOM_FIELDS.DATA_LIBERACAO}]=${this.formatDateForBitrix(new Date(dateRange.from))}&filter[<=${CUSTOM_FIELDS.DATA_LIBERACAO}]=${this.formatDateForBitrix(new Date(dateRange.to))}&filter[!${CUSTOM_FIELDS.DATA_LIBERACAO}]=false&filter[ASSIGNED_BY_ID]=${id}&start=-1`;
       });
 
       console.log('Executando batch request com', Object.keys(batchCommands).length, 'comandos');
@@ -198,38 +198,39 @@ class BitrixApi {
       if (batchResponse.result) {
         console.log('Processando resultados do batch...');
         
-        // Com o novo formato, os resultados estão em result.result[index]
-        const results = batchResponse.result.result;
-        const totals = batchResponse.result.result_total;
+        // Com start=-1, os totais estão em result_total
+        const resultTotals = batchResponse.result.result_total;
         
-        console.log('Resultados arrays:', { results, totals });
+        console.log('🎯 Result totals extraídos:', resultTotals);
         
-        // Para comandos de string, o total está em result_total
-        if (totals && totals.length >= 2) {
-          metrics.totalEnviados = totals[0] || 0; // enviados_count é o primeiro comando
-          metrics.totalLiberados = totals[1] || 0; // liberados_count é o segundo comando
-        }
+        // Processar totais diretos por chave
+        metrics.totalEnviados = resultTotals.enviados_count || 0;
+        metrics.totalLiberados = resultTotals.liberados_count || 0;
 
-        console.log('Totais extraídos:', {
+        console.log('✅ Totais extraídos:', {
           totalEnviados: metrics.totalEnviados,
           totalLiberados: metrics.totalLiberados
         });
 
-        // Processar por responsável - os resultados estão nas posições subsequentes
-        let index = 2; // Começar após enviados_count e liberados_count
-        Object.keys(RESPONSIBLE_USERS).forEach(name => {
-          console.log(`Processando ${name} (índices ${index} e ${index + 1}):`, {
-            enviadosTotal: totals ? totals[index] : 'undefined',
-            liberadosTotal: totals ? totals[index + 1] : 'undefined'
+        // Processar por responsável usando as chaves corretas (com underscores)
+        for (const name of Object.keys(RESPONSIBLE_USERS)) {
+          const keyName = name.replace(/\s+/g, '_'); // Converter espaços para underscores
+          const enviadosKey = `enviados_${keyName}`;
+          const liberadosKey = `liberados_${keyName}`;
+          
+          console.log(`Processando ${name}:`, {
+            keyName,
+            enviadosKey,
+            liberadosKey,
+            enviadosValue: resultTotals[enviadosKey],
+            liberadosValue: resultTotals[liberadosKey]
           });
           
-          if (totals) {
-            metrics.responsaveis[name].enviados = totals[index] || 0;
-            metrics.responsaveis[name].liberados = totals[index + 1] || 0;
-          }
-          
-          index += 2; // Cada responsável tem 2 comandos (enviados + liberados)
-        });
+          metrics.responsaveis[name] = {
+            enviados: resultTotals[enviadosKey] || 0,
+            liberados: resultTotals[liberadosKey] || 0,
+          };
+        }
       } else {
         console.error('❌ Nenhum resultado no batch response');
       }

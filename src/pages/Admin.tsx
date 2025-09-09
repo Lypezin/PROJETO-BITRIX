@@ -67,9 +67,11 @@ export default function Admin() {
   };
 
   const handleApplyFilters = () => {
+    // Garante que a hora esteja correta ao aplicar o filtro
     setFilters({
-      startDate: dateRange.start,
-      endDate: dateRange.end,
+      ...filters, // Mantém o responsável selecionado
+      startDate: startOfDay(dateRange.start),
+      endDate: endOfDay(dateRange.end),
     });
   };
 
