@@ -99,8 +99,8 @@ class BitrixApiService {
       const filterEnviado = buildApiDateFilter(dateRange, CUSTOM_FIELDS.DATA_ENVIO);
       const filterLiberado = buildApiDateFilter(dateRange, CUSTOM_FIELDS.DATA_LIBERACAO);
       
-      console.log('Filtro de enviados (nova lógica):', filterEnviado);
-      console.log('Filtro de liberados (nova lógica):', filterLiberado);
+      console.log('Filtro de enviados (nova lógica):', JSON.stringify(filterEnviado, null, 2));
+      console.log('Filtro de liberados (nova lógica):', JSON.stringify(filterLiberado, null, 2));
 
       const metrics: DashboardMetrics = {
         totalEnviados: 0,
@@ -140,17 +140,17 @@ class BitrixApiService {
         start: 0,
         order: { ID: 'DESC' }
       });
-      console.log('Debug - Contatos COM datas de envio:', debugWithDates.result?.slice(0, 3));
+      console.log('Debug - Contatos COM datas de envio:', JSON.stringify(debugWithDates.result?.slice(0, 3), null, 2));
       
       // Debug: mostrar formato real das datas
       if (debugWithDates.result && debugWithDates.result.length > 0) {
         const firstContact = debugWithDates.result[0];
-        console.log('Debug - Formato real da data de envio:', {
+        console.log('Debug - Formato real da data de envio:', JSON.stringify({
           ID: firstContact.ID,
           NAME: firstContact.NAME,
           DATA_ENVIO: firstContact[CUSTOM_FIELDS.DATA_ENVIO],
           TIPO: typeof firstContact[CUSTOM_FIELDS.DATA_ENVIO]
-        });
+        }, null, 2));
       }
       
       // Debug: buscar contatos com datas de liberação
@@ -162,17 +162,17 @@ class BitrixApiService {
         start: 0,
         order: { ID: 'DESC' }
       });
-      console.log('Debug - Contatos COM datas de liberação:', debugWithLiberacao.result?.slice(0, 3));
+      console.log('Debug - Contatos COM datas de liberação:', JSON.stringify(debugWithLiberacao.result?.slice(0, 3), null, 2));
       
       // Debug: mostrar formato real das datas de liberação
       if (debugWithLiberacao.result && debugWithLiberacao.result.length > 0) {
         const firstContact = debugWithLiberacao.result[0];
-        console.log('Debug - Formato real da data de liberação:', {
+        console.log('Debug - Formato real da data de liberação:', JSON.stringify({
           ID: firstContact.ID,
           NAME: firstContact.NAME,
           DATA_LIBERACAO: firstContact[CUSTOM_FIELDS.DATA_LIBERACAO],
           TIPO: typeof firstContact[CUSTOM_FIELDS.DATA_LIBERACAO]
-        });
+        }, null, 2));
       }
       
       // Debug: testar filtro mais amplo (últimos 30 dias)
@@ -200,12 +200,12 @@ class BitrixApiService {
       console.log('Debug - Total de contatos (sem filtro):', debugNoFilter.total);
       if (debugNoFilter.result && debugNoFilter.result.length > 0) {
         const firstContact = debugNoFilter.result[0];
-        console.log('Debug - Primeiro contato (sem filtro):', {
+        console.log('Debug - Primeiro contato (sem filtro):', JSON.stringify({
           ID: firstContact.ID,
           NAME: firstContact.NAME,
           DATA_ENVIO: firstContact[CUSTOM_FIELDS.DATA_ENVIO],
           DATA_LIBERACAO: firstContact[CUSTOM_FIELDS.DATA_LIBERACAO]
-        });
+        }, null, 2));
       }
 
       // Contar liberados total
