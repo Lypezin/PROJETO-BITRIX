@@ -28,19 +28,11 @@ class BitrixApiService {
   private baseUrl = '/api/bitrix-proxy';
 
   async getDashboardMetrics(startDate: Date, endDate: Date): Promise<DashboardMetrics> {
-    console.log('🚀 getDashboardMetrics INICIADO:', { startDate, endDate });
-    
-    // TESTE TEMPORÁRIO: Forçar data 08/09/2025 que sabemos que tem dados
-    const testStartDate = new Date('2025-09-08');
-    const testEndDate = new Date('2025-09-08');
-    console.log('🧪 TESTE: Forçando data 08/09/2025 para verificar se há dados');
-    
     try {
       const commands: { [key: string]: string } = {};
 
       const createFilterString = (field: string, start: Date, end: Date, userId?: number) => {
-        // CORREÇÃO CRUCIAL: Use "menor que o dia seguinte" em vez de "menor igual a 23:59:59"
-        // Isso é mais robusto e à prova de fuso horário
+        // Use "menor que o dia seguinte" para robustez de fuso horário
         const startOfDay = new Date(start);
         startOfDay.setHours(0, 0, 0, 0);
         
@@ -55,53 +47,36 @@ class BitrixApiService {
         return `crm.contact.list?start=0&limit=1000&${filter}`;
       };
 
-      commands['enviados_count'] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, testStartDate, testEndDate);
-      commands['liberados_count'] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, testStartDate, testEndDate);
+      commands['enviados_count'] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate);
+      commands['liberados_count'] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, startDate, endDate);
 
       for (const [name, userId] of Object.entries(RESPONSIBLE_USERS)) {
-        commands[`enviados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, testStartDate, testEndDate, userId);
-        commands[`liberados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, testStartDate, testEndDate, userId);
+        commands[`enviados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate, userId);
+        commands[`liberados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, startDate, endDate, userId);
       }
-      
-      console.log('📊 Comandos do batch construídos:', commands);
-      console.log('🔗 Chamando API Bitrix...');
       
       const response = await this.callBitrixMethod('batch', { cmd: commands });
       
-      console.log('✅ Resposta recebida:', response);
-      console.log('🔍 Resposta completa detalhada:', JSON.stringify(response, null, 2));
-      
-      // CORREÇÃO CRÍTICA: start=-1 não funciona, vamos contar os dados retornados
-      const batchResults = response.result.result;
+      // CORREÇÃO FINAL: result_total TEM OS VALORES CORRETOS!
       const resultTotals = response.result.result_total;
       
-      console.log('🎯 Result totals recebidos:', resultTotals);
-      console.log('📊 Batch results recebidos:', batchResults);
-
-      // Contar dados reais em vez de usar result_total que não funciona
+      // USAR result_total que está funcionando perfeitamente!
       const metrics: DashboardMetrics = {
-        totalEnviados: batchResults.enviados_count ? batchResults.enviados_count.length : 0,
-        totalLiberados: batchResults.liberados_count ? batchResults.liberados_count.length : 0,
+        totalEnviados: resultTotals.enviados_count || 0,
+        totalLiberados: resultTotals.liberados_count || 0,
         responsaveis: {}
       };
 
-      console.log('📈 Totais principais CORRIGIDOS:', {
-        totalEnviados: metrics.totalEnviados,
-        totalLiberados: metrics.totalLiberados
-      });
-
-      // Contar por responsável
+      // Usar result_total para responsáveis também
       for (const name of Object.keys(RESPONSIBLE_USERS)) {
           const enviadosKey = `enviados_${name}`;
           const liberadosKey = `liberados_${name}`;
           
           metrics.responsaveis[name] = {
-              enviados: batchResults[enviadosKey] ? batchResults[enviadosKey].length : 0,
-              liberados: batchResults[liberadosKey] ? batchResults[liberadosKey].length : 0,
+              enviados: resultTotals[enviadosKey] || 0,
+              liberados: resultTotals[liberadosKey] || 0,
           };
       }
-
-      console.log('🎯 Métricas finais calculadas:', metrics);
       return metrics;
 
     } catch (error) {
@@ -187,28 +162,19 @@ class BitrixApiService {
   }
 
   private async callBitrixMethod(method: string, params: any = {}) {
-    console.log(`🔗 Chamando método ${method} com params:`, params);
-    
     try {
-      const requestData = {
+      const response = await axios.post(this.baseUrl, {
         method,
         params
-      };
-      
-      console.log('📤 Enviando para proxy:', this.baseUrl, requestData);
-      
-      const response = await axios.post(this.baseUrl, requestData);
-      
-      console.log('📥 Resposta do proxy recebida:', response.status, response.data);
+      });
 
       if (response.data.error) {
-        console.error('❌ Erro do Bitrix24:', response.data.error_description);
         throw new Error(`Erro do Bitrix24: ${response.data.error_description}`);
       }
 
       return response.data;
     } catch (error) {
-      console.error(`❌ Erro na chamada ${method}:`, error);
+      console.error(`Erro na chamada ${method}:`, error);
       throw error;
     }
   }
