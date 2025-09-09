@@ -28,6 +28,8 @@ class BitrixApiService {
   private baseUrl = '/api/bitrix-proxy';
 
   async getDashboardMetrics(startDate: Date, endDate: Date): Promise<DashboardMetrics> {
+    console.log('🚀 getDashboardMetrics INICIADO:', { startDate, endDate });
+    
     try {
       const commands: { [key: string]: string } = {};
 
@@ -56,15 +58,27 @@ class BitrixApiService {
         commands[`liberados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, startDate, endDate, userId);
       }
       
+      console.log('📊 Comandos do batch construídos:', commands);
+      console.log('🔗 Chamando API Bitrix...');
+      
       const response = await this.callBitrixMethod('batch', { cmd: commands });
       
+      console.log('✅ Resposta recebida:', response);
+      
       const resultTotals = response.result.result_total;
+      
+      console.log('🎯 Result totals recebidos:', resultTotals);
 
       const metrics: DashboardMetrics = {
         totalEnviados: resultTotals.enviados_count || 0,
         totalLiberados: resultTotals.liberados_count || 0,
         responsaveis: {}
       };
+
+      console.log('📈 Totais principais:', {
+        totalEnviados: metrics.totalEnviados,
+        totalLiberados: metrics.totalLiberados
+      });
 
       for (const name of Object.keys(RESPONSIBLE_USERS)) {
           metrics.responsaveis[name] = {
@@ -73,6 +87,7 @@ class BitrixApiService {
           };
       }
 
+      console.log('🎯 Métricas finais calculadas:', metrics);
       return metrics;
 
     } catch (error) {
@@ -158,19 +173,28 @@ class BitrixApiService {
   }
 
   private async callBitrixMethod(method: string, params: any = {}) {
+    console.log(`🔗 Chamando método ${method} com params:`, params);
+    
     try {
-      const response = await axios.post(this.baseUrl, {
+      const requestData = {
         method,
         params
-      });
+      };
+      
+      console.log('📤 Enviando para proxy:', this.baseUrl, requestData);
+      
+      const response = await axios.post(this.baseUrl, requestData);
+      
+      console.log('📥 Resposta do proxy recebida:', response.status, response.data);
 
       if (response.data.error) {
+        console.error('❌ Erro do Bitrix24:', response.data.error_description);
         throw new Error(`Erro do Bitrix24: ${response.data.error_description}`);
       }
 
       return response.data;
     } catch (error) {
-      console.error(`Erro na chamada ${method}:`, error);
+      console.error(`❌ Erro na chamada ${method}:`, error);
       throw error;
     }
   }

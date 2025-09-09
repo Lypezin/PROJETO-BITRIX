@@ -17,15 +17,26 @@ export const useDashboard = () => {
   } = useDashboardStore();
 
   const fetchData = useCallback(async () => {
+    console.log('🔄 useDashboard.fetchData INICIADO');
+    console.log('📅 Filtros atuais:', filters);
+    
     try {
       setLoading(true);
+      console.log('⏳ Chamando bitrixApi.getDashboardMetrics...');
+      
       const metrics = await bitrixApi.getDashboardMetrics(filters.startDate, filters.endDate);
+      
+      console.log('📊 Métricas recebidas no hook:', metrics);
+      
       setData(metrics);
       updateLastUpdate();
+      
+      console.log('✅ Dados atualizados no store');
     } catch (error) {
-      console.error('Erro ao buscar dados do dashboard:', error);
+      console.error('❌ Erro ao buscar dados do dashboard:', error);
     } finally {
       setLoading(false);
+      console.log('🔄 fetchData FINALIZADO');
     }
   }, [filters.startDate, filters.endDate, setData, setLoading, updateLastUpdate]);
 
