@@ -30,6 +30,11 @@ class BitrixApiService {
   async getDashboardMetrics(startDate: Date, endDate: Date): Promise<DashboardMetrics> {
     console.log('🚀 getDashboardMetrics INICIADO:', { startDate, endDate });
     
+    // TESTE TEMPORÁRIO: Forçar data 08/09/2025 que sabemos que tem dados
+    const testStartDate = new Date('2025-09-08');
+    const testEndDate = new Date('2025-09-08');
+    console.log('🧪 TESTE: Forçando data 08/09/2025 para verificar se há dados');
+    
     try {
       const commands: { [key: string]: string } = {};
 
@@ -50,12 +55,12 @@ class BitrixApiService {
         return `crm.contact.list?start=-1&${filter}`;
       };
 
-      commands['enviados_count'] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate);
-      commands['liberados_count'] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, startDate, endDate);
+      commands['enviados_count'] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, testStartDate, testEndDate);
+      commands['liberados_count'] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, testStartDate, testEndDate);
 
       for (const [name, userId] of Object.entries(RESPONSIBLE_USERS)) {
-        commands[`enviados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate, userId);
-        commands[`liberados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, startDate, endDate, userId);
+        commands[`enviados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, testStartDate, testEndDate, userId);
+        commands[`liberados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, testStartDate, testEndDate, userId);
       }
       
       console.log('📊 Comandos do batch construídos:', commands);
@@ -64,6 +69,7 @@ class BitrixApiService {
       const response = await this.callBitrixMethod('batch', { cmd: commands });
       
       console.log('✅ Resposta recebida:', response);
+      console.log('🔍 Resposta completa detalhada:', JSON.stringify(response, null, 2));
       
       const resultTotals = response.result.result_total;
       
