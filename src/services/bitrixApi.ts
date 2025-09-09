@@ -88,9 +88,12 @@ class BitrixApiService {
     try {
       const dateRange = { from: startDate, to: endDate };
       
-      // Usar a nova função buildApiDateFilter
-      const filterEnviado = buildApiDateFilter(dateRange, CUSTOM_FIELDS.DATA_ENVIO);
-      const filterLiberado = buildApiDateFilter(dateRange, CUSTOM_FIELDS.DATA_LIBERACAO);
+      // TEMPORÁRIO: Testar com data onde sabemos que há dados (8 de setembro)
+      const testDate = new Date('2025-09-08T00:00:00-03:00');
+      const filterEnviado = buildApiDateFilter({ from: testDate, to: testDate }, CUSTOM_FIELDS.DATA_ENVIO);
+      const filterLiberado = buildApiDateFilter({ from: testDate, to: testDate }, CUSTOM_FIELDS.DATA_LIBERACAO);
+      
+      console.log('TEMPORÁRIO: Testando com data 8/09 onde há dados');
       
       console.log('Filtro de enviados (nova lógica):', JSON.stringify(filterEnviado, null, 2));
       console.log('Filtro de liberados (nova lógica):', JSON.stringify(filterLiberado, null, 2));
