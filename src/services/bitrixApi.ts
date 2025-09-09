@@ -7,12 +7,12 @@ const RESPONSIBLE_USERS = {
   'Fernanda Raphaelly': '4990',
   'Carolini Braguini': '4984',
   'Kerolay Oliveira': '4992'
-};
+} as const;
 
 const CUSTOM_FIELDS = {
   DATA_ENVIO: 'UF_CRM_1659459001630',
   DATA_LIBERACAO: 'UF_CRM_1669498023605'
-};
+} as const;
 
 export interface DashboardMetrics {
   totalEnviados: number;
@@ -32,11 +32,33 @@ export interface Contact {
   [key: string]: any;
 }
 
+interface DateRange {
+  from: Date;
+  to: Date;
+}
+
 class BitrixApi {
   private baseUrl = '/api/bitrix-proxy';
+  private lastRequestTime = 0;
+  private readonly REQUEST_DELAY = 500; // 500ms = 2 requests per second
 
-  // Chamar método da API do Bitrix24
+  // Rate limiting: espera entre requisições para respeitar limite da API
+  private async waitForRateLimit(): Promise<void> {
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastRequestTime;
+    
+    if (timeSinceLastRequest < this.REQUEST_DELAY) {
+      const waitTime = this.REQUEST_DELAY - timeSinceLastRequest;
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+    
+    this.lastRequestTime = Date.now();
+  }
+
+  // Chamar método da API do Bitrix24 com rate limiting
   private async callBitrixMethod(method: string, params: any = {}) {
+    await this.waitForRateLimit();
+    
     try {
       const response = await axios.post(this.baseUrl, {
         method,
@@ -49,10 +71,39 @@ class BitrixApi {
     }
   }
 
-  // Obter métricas do dashboard usando contagem manual
-  async getDashboardMetrics(_startDate: Date, _endDate: Date): Promise<DashboardMetrics> {
+  // Formatar data para filtro Bitrix24 (formato correto)
+  private formatDateForBitrix(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
+
+  // Construir filtro de data otimizado
+  private buildDateFilter(dateRange: DateRange, fieldId: string) {
+    const startDate = new Date(dateRange.from);
+    startDate.setHours(0, 0, 0, 0);
+    
+    const endDate = new Date(dateRange.to);
+    endDate.setHours(23, 59, 59, 999);
+    
+    return {
+      [`>=${fieldId}`]: this.formatDateForBitrix(startDate),
+      [`<=${fieldId}`]: this.formatDateForBitrix(endDate)
+    };
+  }
+
+  // Obter métricas do dashboard usando filtros otimizados
+  async getDashboardMetrics(startDate: Date, endDate: Date): Promise<DashboardMetrics> {
     try {
-      console.log('🎯 SOLUÇÃO ALTERNATIVA: Contagem manual de contatos com datas específicas');
+      console.log('🚀 Buscando métricas otimizadas para:', {
+        startDate: startDate.toLocaleDateString(),
+        endDate: endDate.toLocaleDateString()
+      });
       
       const metrics: DashboardMetrics = {
         totalEnviados: 0,
@@ -65,92 +116,200 @@ class BitrixApi {
         metrics.responsaveis[name] = { enviados: 0, liberados: 0 };
       });
 
-      // Buscar TODOS os contatos com paginação (sem filtro de data)
-      const allContacts = [];
-      let start = 0;
-      const limit = 50;
+      const dateRange = { from: startDate, to: endDate };
       
-      console.log('Buscando todos os contatos com paginação...');
-      
-      while (true) {
-        const response = await this.callBitrixMethod('crm.contact.list', {
-          select: ['ID', 'NAME', 'ASSIGNED_BY_ID', CUSTOM_FIELDS.DATA_ENVIO, CUSTOM_FIELDS.DATA_LIBERACAO],
-          start,
-          limit
-        });
-        
-        if (!response.result || response.result.length === 0) {
-          break;
+      // Usar batch request para eficiência máxima
+      const batchCommands: any = {
+        // Contar enviados total
+        enviados_count: {
+          method: 'crm.contact.list',
+          params: {
+            filter: {
+              ...this.buildDateFilter(dateRange, CUSTOM_FIELDS.DATA_ENVIO),
+              [`!${CUSTOM_FIELDS.DATA_ENVIO}`]: false // Excluir campos vazios
+            },
+            select: ['ID'],
+            start: -1 // Só contar, não buscar dados
+          }
+        },
+        // Contar liberados total
+        liberados_count: {
+          method: 'crm.contact.list',
+          params: {
+            filter: {
+              ...this.buildDateFilter(dateRange, CUSTOM_FIELDS.DATA_LIBERACAO),
+              [`!${CUSTOM_FIELDS.DATA_LIBERACAO}`]: false // Excluir campos vazios
+            },
+            select: ['ID'],
+            start: -1 // Só contar, não buscar dados
+          }
         }
-        
-        allContacts.push(...response.result);
-        start += limit;
-        
-        console.log(`Buscados ${allContacts.length} contatos até agora...`);
+      };
+
+      // Adicionar comandos para cada responsável
+      Object.entries(RESPONSIBLE_USERS).forEach(([name, id]) => {
+        // Enviados por responsável
+        batchCommands[`enviados_${name.replace(/\s+/g, '_')}`] = {
+          method: 'crm.contact.list',
+          params: {
+            filter: {
+              ...this.buildDateFilter(dateRange, CUSTOM_FIELDS.DATA_ENVIO),
+              [`!${CUSTOM_FIELDS.DATA_ENVIO}`]: false,
+              'ASSIGNED_BY_ID': id
+            },
+            select: ['ID'],
+            start: -1
+          }
+        };
+
+        // Liberados por responsável
+        batchCommands[`liberados_${name.replace(/\s+/g, '_')}`] = {
+          method: 'crm.contact.list',
+          params: {
+            filter: {
+              ...this.buildDateFilter(dateRange, CUSTOM_FIELDS.DATA_LIBERACAO),
+              [`!${CUSTOM_FIELDS.DATA_LIBERACAO}`]: false,
+              'ASSIGNED_BY_ID': id
+            },
+            select: ['ID'],
+            start: -1
+          }
+        };
+      });
+
+      console.log('Executando batch request com', Object.keys(batchCommands).length, 'comandos');
+      
+      // Executar batch request
+      const batchResponse = await this.callBitrixMethod('batch', {
+        cmd: batchCommands
+      });
+
+      console.log('Resposta do batch:', batchResponse);
+
+      if (batchResponse.result) {
+        // Processar resultados
+        metrics.totalEnviados = batchResponse.result.enviados_count?.total || 0;
+        metrics.totalLiberados = batchResponse.result.liberados_count?.total || 0;
+
+        // Processar por responsável
+        Object.keys(RESPONSIBLE_USERS).forEach(name => {
+          const keyName = name.replace(/\s+/g, '_');
+          const enviadosKey = `enviados_${keyName}`;
+          const liberadosKey = `liberados_${keyName}`;
+          
+          metrics.responsaveis[name].enviados = batchResponse.result[enviadosKey]?.total || 0;
+          metrics.responsaveis[name].liberados = batchResponse.result[liberadosKey]?.total || 0;
+        });
       }
 
-      console.log('Total de contatos encontrados:', allContacts.length);
-
-      // Filtrar manualmente por data
-      const targetDate = '2025-09-08'; // Data onde sabemos que há dados
-      
-      const enviados = allContacts.filter((contact: any) => {
-        const dataEnvio = contact[CUSTOM_FIELDS.DATA_ENVIO];
-        return dataEnvio && dataEnvio.includes(targetDate);
-      });
-
-      const liberados = allContacts.filter((contact: any) => {
-        const dataLiberacao = contact[CUSTOM_FIELDS.DATA_LIBERACAO];
-        return dataLiberacao && dataLiberacao.includes(targetDate);
-      });
-
-      console.log('Contatos enviados em 08/09 (manual):', enviados.length);
-      console.log('Contatos liberados em 08/09 (manual):', liberados.length);
-
-      metrics.totalEnviados = enviados.length;
-      metrics.totalLiberados = liberados.length;
-
-      // Contar por responsável
-      enviados.forEach((contact: any) => {
-        const responsibleId = contact.ASSIGNED_BY_ID;
-        const responsibleName = Object.keys(RESPONSIBLE_USERS).find(
-          (name: string) => (RESPONSIBLE_USERS as any)[name] === responsibleId
-        );
-        if (responsibleName) {
-          metrics.responsaveis[responsibleName].enviados++;
-        }
-      });
-
-      liberados.forEach((contact: any) => {
-        const responsibleId = contact.ASSIGNED_BY_ID;
-        const responsibleName = Object.keys(RESPONSIBLE_USERS).find(
-          (name: string) => (RESPONSIBLE_USERS as any)[name] === responsibleId
-        );
-        if (responsibleName) {
-          metrics.responsaveis[responsibleName].liberados++;
-        }
-      });
-
-      console.log('Métricas finais:', metrics);
+      console.log('✅ Métricas calculadas:', metrics);
       return metrics;
 
     } catch (error) {
-      console.error('Erro ao obter métricas do dashboard:', error);
-      throw error;
+      console.error('❌ Erro ao obter métricas do dashboard:', error);
+      
+      // Fallback: tentar método simples se batch falhar
+      return this.getFallbackMetrics(startDate, endDate);
     }
   }
 
-  // Exportar contatos para Excel
-  async exportContacts(startDate: Date, endDate: Date, responsavelId?: string) {
+  // Método fallback se batch request falhar
+  private async getFallbackMetrics(startDate: Date, endDate: Date): Promise<DashboardMetrics> {
+    console.log('🔄 Usando método fallback...');
+    
+    const metrics: DashboardMetrics = {
+      totalEnviados: 0,
+      totalLiberados: 0,
+      responsaveis: {}
+    };
+
+    // Inicializar responsáveis
+    Object.keys(RESPONSIBLE_USERS).forEach(name => {
+      metrics.responsaveis[name] = { enviados: 0, liberados: 0 };
+    });
+
+    const dateRange = { from: startDate, to: endDate };
+
     try {
-      console.log('Exportando contatos...', { startDate, endDate, responsavelId });
+      // Buscar enviados
+      const enviadosResponse = await this.callBitrixMethod('crm.contact.list', {
+        filter: {
+          ...this.buildDateFilter(dateRange, CUSTOM_FIELDS.DATA_ENVIO),
+          [`!${CUSTOM_FIELDS.DATA_ENVIO}`]: false
+        },
+        select: ['ID', 'ASSIGNED_BY_ID'],
+        start: -1
+      });
+
+      metrics.totalEnviados = enviadosResponse.total || 0;
+
+      // Buscar liberados
+      const liberadosResponse = await this.callBitrixMethod('crm.contact.list', {
+        filter: {
+          ...this.buildDateFilter(dateRange, CUSTOM_FIELDS.DATA_LIBERACAO),
+          [`!${CUSTOM_FIELDS.DATA_LIBERACAO}`]: false
+        },
+        select: ['ID', 'ASSIGNED_BY_ID'],
+        start: -1
+      });
+
+      metrics.totalLiberados = liberadosResponse.total || 0;
+
+      // Se precisar dos dados por responsável, buscar mais detalhes
+      if (enviadosResponse.result) {
+        enviadosResponse.result.forEach((contact: any) => {
+          const responsibleName = Object.keys(RESPONSIBLE_USERS).find(
+            name => RESPONSIBLE_USERS[name as keyof typeof RESPONSIBLE_USERS] === contact.ASSIGNED_BY_ID
+          );
+          if (responsibleName) {
+            metrics.responsaveis[responsibleName].enviados++;
+          }
+        });
+      }
+
+      if (liberadosResponse.result) {
+        liberadosResponse.result.forEach((contact: any) => {
+          const responsibleName = Object.keys(RESPONSIBLE_USERS).find(
+            name => RESPONSIBLE_USERS[name as keyof typeof RESPONSIBLE_USERS] === contact.ASSIGNED_BY_ID
+          );
+          if (responsibleName) {
+            metrics.responsaveis[responsibleName].liberados++;
+          }
+        });
+      }
+
+    } catch (error) {
+      console.error('❌ Erro no método fallback:', error);
+    }
+
+    return metrics;
+  }
+
+  // Exportar contatos com paginação otimizada
+  async exportContacts(startDate: Date, endDate: Date, responsavelId?: string): Promise<Contact[]> {
+    try {
+      console.log('📊 Exportando contatos...', { startDate, endDate, responsavelId });
       
-      const allContacts = [];
+      const dateRange = { from: startDate, to: endDate };
+      const allContacts: Contact[] = [];
+      
+      // Construir filtro base
+      const baseFilter: any = {
+        ...this.buildDateFilter(dateRange, CUSTOM_FIELDS.DATA_ENVIO),
+        [`!${CUSTOM_FIELDS.DATA_ENVIO}`]: false
+      };
+
+      // Adicionar filtro de responsável se especificado
+      if (responsavelId) {
+        baseFilter['ASSIGNED_BY_ID'] = responsavelId;
+      }
+
       let start = 0;
       const limit = 50;
       
       while (true) {
         const response = await this.callBitrixMethod('crm.contact.list', {
+          filter: baseFilter,
           select: ['ID', 'NAME', 'ASSIGNED_BY_ID', CUSTOM_FIELDS.DATA_ENVIO, CUSTOM_FIELDS.DATA_LIBERACAO],
           start,
           limit
@@ -162,24 +321,15 @@ class BitrixApi {
         
         allContacts.push(...response.result);
         start += limit;
+        
+        console.log(`📦 Exportados ${allContacts.length} contatos até agora...`);
       }
       
-      // Filtrar por data manualmente
-      const filteredContacts = allContacts.filter(contact => {
-        const dataEnvio = contact[CUSTOM_FIELDS.DATA_ENVIO];
-        const dataLiberacao = contact[CUSTOM_FIELDS.DATA_LIBERACAO];
-        
-        const hasDataEnvio = dataEnvio && dataEnvio.includes('2025-09-08');
-        const hasDataLiberacao = dataLiberacao && dataLiberacao.includes('2025-09-08');
-        
-        return hasDataEnvio || hasDataLiberacao;
-      });
-      
-      console.log('Contatos filtrados para exportação:', filteredContacts.length);
-      return filteredContacts;
+      console.log('✅ Exportação concluída:', allContacts.length, 'contatos');
+      return allContacts;
       
     } catch (error) {
-      console.error('Erro ao exportar contatos:', error);
+      console.error('❌ Erro ao exportar contatos:', error);
       throw error;
     }
   }
