@@ -65,26 +65,44 @@ class BitrixApi {
         metrics.responsaveis[name] = { enviados: 0, liberados: 0 };
       });
 
-      // Buscar TODOS os contatos (sem filtro de data)
-      const allContactsResponse = await this.callBitrixMethod('crm.contact.list', {
-        select: ['ID', 'NAME', 'ASSIGNED_BY_ID', CUSTOM_FIELDS.DATA_ENVIO, CUSTOM_FIELDS.DATA_LIBERACAO],
-        start: 0
-      });
+      // Buscar TODOS os contatos com paginação (sem filtro de data)
+      const allContacts = [];
+      let start = 0;
+      const limit = 50;
+      
+      console.log('Buscando todos os contatos com paginação...');
+      
+      while (true) {
+        const response = await this.callBitrixMethod('crm.contact.list', {
+          select: ['ID', 'NAME', 'ASSIGNED_BY_ID', CUSTOM_FIELDS.DATA_ENVIO, CUSTOM_FIELDS.DATA_LIBERACAO],
+          start,
+          limit
+        });
+        
+        if (!response.result || response.result.length === 0) {
+          break;
+        }
+        
+        allContacts.push(...response.result);
+        start += limit;
+        
+        console.log(`Buscados ${allContacts.length} contatos até agora...`);
+      }
 
-      console.log('Total de contatos encontrados:', allContactsResponse.result?.length || 0);
+      console.log('Total de contatos encontrados:', allContacts.length);
 
       // Filtrar manualmente por data
       const targetDate = '2025-09-08'; // Data onde sabemos que há dados
       
-      const enviados = allContactsResponse.result?.filter((contact: any) => {
+      const enviados = allContacts.filter((contact: any) => {
         const dataEnvio = contact[CUSTOM_FIELDS.DATA_ENVIO];
         return dataEnvio && dataEnvio.includes(targetDate);
-      }) || [];
+      });
 
-      const liberados = allContactsResponse.result?.filter((contact: any) => {
+      const liberados = allContacts.filter((contact: any) => {
         const dataLiberacao = contact[CUSTOM_FIELDS.DATA_LIBERACAO];
         return dataLiberacao && dataLiberacao.includes(targetDate);
-      }) || [];
+      });
 
       console.log('Contatos enviados em 08/09 (manual):', enviados.length);
       console.log('Contatos liberados em 08/09 (manual):', liberados.length);
