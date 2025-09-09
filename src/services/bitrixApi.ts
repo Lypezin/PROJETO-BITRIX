@@ -11,12 +11,11 @@ import {
  * @param date O objeto de data a ser formatado.
  */
 const formatDateForBitrix = (date: Date): string => {
-  // Formato correto para Bitrix24: ISO 8601 com timezone +03:00 (como retornado pela API)
-  // Converter para timezone do Brasil (UTC-3) e formatar como +03:00
-  const brazilDate = new Date(date.getTime() - (3 * 60 * 60 * 1000));
-  const isoString = brazilDate.toISOString();
-  // Substituir Z por +03:00 e remover milissegundos para corresponder ao formato do Bitrix
-  return isoString.replace('Z', '+03:00').replace(/\.\d{3}/, '');
+  // TESTE: Formato simples YYYY-MM-DD sem hora
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 /**
@@ -95,7 +94,7 @@ class BitrixApiService {
       const filterEnviado = buildApiDateFilter({ from: testDate, to: testDate }, CUSTOM_FIELDS.DATA_ENVIO);
       const filterLiberado = buildApiDateFilter({ from: testDate, to: testDate }, CUSTOM_FIELDS.DATA_LIBERACAO);
       
-      console.log('🎯 CORREÇÃO: Testando com data 8/09 onde há dados - Formato correto ISO 8601 com timezone +03:00 (sem milissegundos)');
+      console.log('🎯 TESTE: Testando com data 8/09 onde há dados - Formato simples YYYY-MM-DD');
       
       console.log('Filtro de enviados (nova lógica):', JSON.stringify(filterEnviado, null, 2));
       console.log('Filtro de liberados (nova lógica):', JSON.stringify(filterLiberado, null, 2));
