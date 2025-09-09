@@ -32,7 +32,16 @@ class BitrixApiService {
       const commands: { [key: string]: string } = {};
 
       const createFilterString = (field: string, start: Date, end: Date, userId?: number) => {
-        let filter = `filter[>=${field}]=${encodeURIComponent(formatDateTimeForBitrix(start))}&filter[<=${field}]=${encodeURIComponent(formatDateTimeForBitrix(end))}`;
+        // CORREÇÃO CRUCIAL: Use "menor que o dia seguinte" em vez de "menor igual a 23:59:59"
+        // Isso é mais robusto e à prova de fuso horário
+        const startOfDay = new Date(start);
+        startOfDay.setHours(0, 0, 0, 0);
+        
+        const nextDay = new Date(end);
+        nextDay.setDate(nextDay.getDate() + 1);
+        nextDay.setHours(0, 0, 0, 0);
+        
+        let filter = `filter[>=${field}]=${encodeURIComponent(formatDateTimeForBitrix(startOfDay))}&filter[<${field}]=${encodeURIComponent(formatDateTimeForBitrix(nextDay))}`;
         if (userId) {
           filter += `&filter[ASSIGNED_BY_ID]=${userId}`;
         }
@@ -120,10 +129,25 @@ class BitrixApiService {
   }
 
   private createContactFilter(startDate: Date, endDate: Date, responsavelId?: number) {
+    // CORREÇÃO CRUCIAL: Use "menor que o dia seguinte" para consistência
+    const startOfDay = new Date(startDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const nextDay = new Date(endDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    nextDay.setHours(0, 0, 0, 0);
+    
     const filter: any = {
       'LOGIC': 'OR',
-      [`><${CUSTOM_FIELDS.DATA_ENVIO}`]: [formatDateTimeForBitrix(startDate), formatDateTimeForBitrix(endDate)],
-      [`><${CUSTOM_FIELDS.DATA_LIBERACAO}`]: [formatDateTimeForBitrix(startDate), formatDateTimeForBitrix(endDate)],
+      // Use >= startOfDay e < nextDay para cada campo
+      '0': {
+        [`>=${CUSTOM_FIELDS.DATA_ENVIO}`]: formatDateTimeForBitrix(startOfDay),
+        [`<${CUSTOM_FIELDS.DATA_ENVIO}`]: formatDateTimeForBitrix(nextDay),
+      },
+      '1': {
+        [`>=${CUSTOM_FIELDS.DATA_LIBERACAO}`]: formatDateTimeForBitrix(startOfDay),
+        [`<${CUSTOM_FIELDS.DATA_LIBERACAO}`]: formatDateTimeForBitrix(nextDay),
+      }
     };
 
     if (responsavelId) {
