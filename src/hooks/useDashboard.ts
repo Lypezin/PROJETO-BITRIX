@@ -1,3 +1,5 @@
+// src/hooks/useDashboard.ts
+
 import { useEffect, useCallback } from 'react';
 import { useDashboardStore } from '../store/dashboardStore';
 import { bitrixApi } from '../services/bitrixApi';
@@ -14,52 +16,23 @@ export const useDashboard = () => {
     updateLastUpdate 
   } = useDashboardStore();
 
-  // Função para buscar dados
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      
-      // **LÓGICA CORRIGIDA PARA USAR O FILTRO DO ADMIN OU O PADRÃO "HOJE"**
-      let startDate: Date;
-      let endDate: Date;
-      
-      if (filters.startDate && filters.endDate) {
-        startDate = filters.startDate;
-        endDate = filters.endDate;
-        console.log('Usando filtro do admin:', { startDate, endDate });
-      } else {
-        const today = new Date();
-        startDate = today;
-        endDate = today;
-        console.log('Usando filtro padrão (hoje):', { startDate, endDate });
-      }
-
-      console.log('Buscando dados para:', { startDate, endDate, responsavel: filters.responsavel });
-
-      const metrics = await bitrixApi.getDashboardMetrics(startDate, endDate);
-      
-      console.log('Métricas recebidas:', metrics);
-      
+      const metrics = await bitrixApi.getDashboardMetrics(filters.startDate, filters.endDate);
       setData(metrics);
       updateLastUpdate();
     } catch (error) {
       console.error('Erro ao buscar dados do dashboard:', error);
-      setData({
-        totalEnviados: 0,
-        totalLiberados: 0,
-        responsaveis: {}
-      });
     } finally {
       setLoading(false);
     }
-  }, [filters.startDate, filters.endDate, filters.responsavel, setData, setLoading, updateLastUpdate]);
+  }, [filters.startDate, filters.endDate, setData, setLoading, updateLastUpdate]);
 
-  // Função para exportar dados
   const exportData = useCallback(async () => {
     try {
       setLoading(true);
       
-      // Determinar o ID do responsável se selecionado
       const responsavelId = filters.responsavel 
         ? Object.entries({
             'Carolini Braguini': 4984,
@@ -70,19 +43,17 @@ export const useDashboard = () => {
           }).find(([name]) => name === filters.responsavel)?.[1]
         : undefined;
 
-      const contacts = await bitrixApi.exportContacts(
+      const contacts = await bitrixApi.getContactsForExport(
         filters.startDate, 
         filters.endDate, 
-        responsavelId?.toString()
+        responsavelId
       );
 
-      // Gerar arquivo Excel
       const XLSX = await import('xlsx');
       const worksheet = XLSX.utils.json_to_sheet(contacts);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Contatos');
       
-      // Nome do arquivo com data
       const fileName = `contatos_${filters.startDate.toISOString().split('T')[0]}_a_${filters.endDate.toISOString().split('T')[0]}.xlsx`;
       
       XLSX.writeFile(workbook, fileName);
@@ -93,16 +64,14 @@ export const useDashboard = () => {
     }
   }, [filters, setLoading]);
 
-  // Efeito para buscar dados quando os filtros mudarem
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // Efeito para polling automático a cada 30 segundos
   useEffect(() => {
     const interval = setInterval(() => {
       fetchData();
-    }, 30000); // 30 segundos
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [fetchData]);
