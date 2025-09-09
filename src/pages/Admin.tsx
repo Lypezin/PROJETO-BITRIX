@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { useDashboard } from '../hooks/useDashboard';
-import { buildApiDateFilter } from '../services/bitrixApi';
-import { CUSTOM_FIELDS } from '../config/bitrix';
+// import { buildApiDateFilter } from '../services/bitrixApi';
+// import { CUSTOM_FIELDS } from '../config/bitrix';
 import { format, startOfDay, endOfDay, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Download, Filter, RefreshCw } from 'lucide-react';
@@ -74,13 +74,7 @@ export default function Admin() {
   };
 
   const handleExport = () => {
-    // **USA A FUNÇÃO CENTRALIZADA PARA CRIAR O FILTRO**
-    const range = { from: dateRange.start, to: dateRange.end };
-    const filterEnviado = buildApiDateFilter(range, CUSTOM_FIELDS.DATA_ENVIO);
-    const filterLiberado = buildApiDateFilter(range, CUSTOM_FIELDS.DATA_LIBERACAO);
-
-    console.log('Filtros para exportação:', { filterEnviado, filterLiberado });
-    
+    console.log('Exportando dados...');
     exportData();
   };
 

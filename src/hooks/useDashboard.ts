@@ -70,10 +70,10 @@ export const useDashboard = () => {
           }).find(([name]) => name === filters.responsavel)?.[1]
         : undefined;
 
-      const contacts = await bitrixApi.getContactsForExport(
+      const contacts = await bitrixApi.exportContacts(
         filters.startDate, 
         filters.endDate, 
-        responsavelId
+        responsavelId?.toString()
       );
 
       // Gerar arquivo Excel
