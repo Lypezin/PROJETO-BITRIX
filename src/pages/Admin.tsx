@@ -59,7 +59,7 @@ export default function Admin() {
                     <input
                       type="date"
                       value={format(dataEnvioRange.start, 'yyyy-MM-dd')}
-                      onChange={(e) => setDataEnvioRange(prev => ({ ...prev, start: new Date(e.target.value) }))}
+                      onChange={(e) => setDataEnvioRange(prev => ({ ...prev, start: new Date(e.target.value.replace(/-/g, '/')) }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -70,7 +70,7 @@ export default function Admin() {
                     <input
                       type="date"
                       value={format(dataEnvioRange.end, 'yyyy-MM-dd')}
-                      onChange={(e) => setDataEnvioRange(prev => ({ ...prev, end: new Date(e.target.value) }))}
+                      onChange={(e) => setDataEnvioRange(prev => ({ ...prev, end: new Date(e.target.value.replace(/-/g, '/')) }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -90,7 +90,7 @@ export default function Admin() {
                     <input
                       type="date"
                       value={format(dataLiberacaoRange.start, 'yyyy-MM-dd')}
-                      onChange={(e) => setDataLiberacaoRange(prev => ({ ...prev, start: new Date(e.target.value) }))}
+                      onChange={(e) => setDataLiberacaoRange(prev => ({ ...prev, start: new Date(e.target.value.replace(/-/g, '/')) }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                     />
                   </div>
@@ -101,7 +101,7 @@ export default function Admin() {
                     <input
                       type="date"
                       value={format(dataLiberacaoRange.end, 'yyyy-MM-dd')}
-                      onChange={(e) => setDataLiberacaoRange(prev => ({ ...prev, end: new Date(e.target.value) }))}
+                      onChange={(e) => setDataLiberacaoRange(prev => ({ ...prev, end: new Date(e.target.value.replace(/-/g, '/')) }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                     />
                   </div>
