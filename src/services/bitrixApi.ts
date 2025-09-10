@@ -58,10 +58,11 @@ class BitrixApiService {
       }, {} as { [key: number]: string });
 
       for (const contact of allContacts) {
+        // Checar Enviados
         const envioDateStr = contact[CUSTOM_FIELDS.DATA_ENVIO];
         if (envioDateStr) {
-          const envioDate = new Date(envioDateStr);
-          if (envioDate >= dataEnvioStart && envioDate <= dataEnvioEnd) {
+          const envioTimestamp = new Date(envioDateStr).getTime();
+          if (envioTimestamp >= dataEnvioStart.getTime() && envioTimestamp <= dataEnvioEnd.getTime()) {
             metrics.totalEnviados++;
             const responsibleName = responsibleUserIds[contact.ASSIGNED_BY_ID];
             if (responsibleName && metrics.responsaveis[responsibleName]) {
@@ -70,10 +71,11 @@ class BitrixApiService {
           }
         }
 
+        // Checar Liberados
         const liberacaoDateStr = contact[CUSTOM_FIELDS.DATA_LIBERACAO];
         if (liberacaoDateStr) {
-          const liberacaoDate = new Date(liberacaoDateStr);
-          if (liberacaoDate >= dataLiberacaoStart && liberacaoDate <= dataLiberacaoEnd) {
+          const liberacaoTimestamp = new Date(liberacaoDateStr).getTime();
+          if (liberacaoTimestamp >= dataLiberacaoStart.getTime() && liberacaoTimestamp <= dataLiberacaoEnd.getTime()) {
             metrics.totalLiberados++;
             const responsibleName = responsibleUserIds[contact.ASSIGNED_BY_ID];
             if (responsibleName && metrics.responsaveis[responsibleName]) {
