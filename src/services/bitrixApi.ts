@@ -57,12 +57,30 @@ class BitrixApiService {
         return acc;
       }, {} as { [key: number]: string });
 
+      let debugLogCount = 0; // Para evitar poluir o console
+
       for (const contact of allContacts) {
-        // Checar Enviados
         const envioDateStr = contact[CUSTOM_FIELDS.DATA_ENVIO];
         if (envioDateStr) {
-          const envioTimestamp = new Date(envioDateStr).getTime();
-          if (envioTimestamp >= dataEnvioStart.getTime() && envioTimestamp <= dataEnvioEnd.getTime()) {
+          const envioDate = new Date(envioDateStr);
+          const envioTimestamp = envioDate.getTime();
+          const startTimestamp = dataEnvioStart.getTime();
+          const endTimestamp = dataEnvioEnd.getTime();
+
+          // Log detalhado APENAS para os 5 primeiros contatos com data
+          if (debugLogCount < 5) {
+            console.log('--- DEBUG DE COMPARAÇÃO DE DATA DE ENVIO ---');
+            console.log('Data (string) do Bitrix:', envioDateStr);
+            console.log('Data convertida para objeto Date:', envioDate);
+            console.log('Data de Início do Filtro:', dataEnvioStart);
+            console.log('Data de Fim do Filtro:', dataEnvioEnd);
+            console.log(`Comparando: ${envioTimestamp} >= ${startTimestamp} && ${envioTimestamp} <= ${endTimestamp}`);
+            console.log('Resultado da comparação:', envioTimestamp >= startTimestamp && envioTimestamp <= endTimestamp);
+            console.log('-------------------------------------------');
+            debugLogCount++;
+          }
+
+          if (envioTimestamp >= startTimestamp && envioTimestamp <= endTimestamp) {
             metrics.totalEnviados++;
             const responsibleName = responsibleUserIds[contact.ASSIGNED_BY_ID];
             if (responsibleName && metrics.responsaveis[responsibleName]) {
