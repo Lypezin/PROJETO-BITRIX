@@ -27,7 +27,12 @@ export interface DashboardMetrics {
 class BitrixApiService {
   private baseUrl = '/api/bitrix-proxy';
 
-  async getDashboardMetrics(startDate: Date, endDate: Date): Promise<DashboardMetrics> {
+  async getDashboardMetrics(
+    dataEnvioStart: Date, 
+    dataEnvioEnd: Date, 
+    dataLiberacaoStart: Date, 
+    dataLiberacaoEnd: Date
+  ): Promise<DashboardMetrics> {
     try {
       const commands: { [key: string]: string } = {};
 
@@ -47,12 +52,16 @@ class BitrixApiService {
         return `crm.contact.list?start=0&limit=1000&${filter}`;
       };
 
-      commands['enviados_count'] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate);
-      commands['liberados_count'] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, startDate, endDate);
+      // Enviados baseados na Data de Envio
+      commands['enviados_count'] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, dataEnvioStart, dataEnvioEnd);
+      
+      // Liberados baseados na Data de Liberação
+      commands['liberados_count'] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, dataLiberacaoStart, dataLiberacaoEnd);
 
+      // Por responsável - enviados pela Data de Envio, liberados pela Data de Liberação
       for (const [name, userId] of Object.entries(RESPONSIBLE_USERS)) {
-        commands[`enviados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, startDate, endDate, userId);
-        commands[`liberados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, startDate, endDate, userId);
+        commands[`enviados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, dataEnvioStart, dataEnvioEnd, userId);
+        commands[`liberados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, dataLiberacaoStart, dataLiberacaoEnd, userId);
       }
       
       const response = await this.callBitrixMethod('batch', { cmd: commands });
@@ -87,15 +96,14 @@ class BitrixApiService {
 
   async getContactsForExport(
     startDate: Date, 
-    endDate: Date, 
-    responsavelId?: number
+    endDate: Date
   ): Promise<ContactData[]> {
     try {
       const allContacts: ContactData[] = [];
       let start = 0;
       const limit = 50;
 
-      const filter = this.createContactFilter(startDate, endDate, responsavelId);
+      const filter = this.createContactFilter(startDate, endDate);
 
       while (true) {
         const response = await this.callBitrixMethod('crm.contact.list', {
@@ -132,8 +140,8 @@ class BitrixApiService {
     }
   }
 
-  private createContactFilter(startDate: Date, endDate: Date, responsavelId?: number) {
-    // CORREÇÃO CRUCIAL: Use "menor que o dia seguinte" para consistência
+  private createContactFilter(startDate: Date, endDate: Date) {
+    // Use "menor que o dia seguinte" para consistência
     const startOfDay = new Date(startDate);
     startOfDay.setHours(0, 0, 0, 0);
     
@@ -141,22 +149,11 @@ class BitrixApiService {
     nextDay.setDate(nextDay.getDate() + 1);
     nextDay.setHours(0, 0, 0, 0);
     
+    // Filtrar apenas pela Data de Envio para exportação
     const filter: any = {
-      'LOGIC': 'OR',
-      // Use >= startOfDay e < nextDay para cada campo
-      '0': {
-        [`>=${CUSTOM_FIELDS.DATA_ENVIO}`]: formatDateTimeForBitrix(startOfDay),
-        [`<${CUSTOM_FIELDS.DATA_ENVIO}`]: formatDateTimeForBitrix(nextDay),
-      },
-      '1': {
-        [`>=${CUSTOM_FIELDS.DATA_LIBERACAO}`]: formatDateTimeForBitrix(startOfDay),
-        [`<${CUSTOM_FIELDS.DATA_LIBERACAO}`]: formatDateTimeForBitrix(nextDay),
-      }
+      [`>=${CUSTOM_FIELDS.DATA_ENVIO}`]: formatDateTimeForBitrix(startOfDay),
+      [`<${CUSTOM_FIELDS.DATA_ENVIO}`]: formatDateTimeForBitrix(nextDay),
     };
-
-    if (responsavelId) {
-      filter['ASSIGNED_BY_ID'] = responsavelId.toString();
-    }
 
     return filter;
   }

@@ -19,7 +19,12 @@ export const useDashboard = () => {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const metrics = await bitrixApi.getDashboardMetrics(filters.startDate, filters.endDate);
+      const metrics = await bitrixApi.getDashboardMetrics(
+        filters.dataEnvioStart,
+        filters.dataEnvioEnd,
+        filters.dataLiberacaoStart,
+        filters.dataLiberacaoEnd
+      );
       setData(metrics);
       updateLastUpdate();
     } catch (error) {
@@ -27,26 +32,15 @@ export const useDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [filters.startDate, filters.endDate, setData, setLoading, updateLastUpdate]);
+  }, [filters.dataEnvioStart, filters.dataEnvioEnd, filters.dataLiberacaoStart, filters.dataLiberacaoEnd, setData, setLoading, updateLastUpdate]);
 
   const exportData = useCallback(async () => {
     try {
       setLoading(true);
-      
-      const responsavelId = filters.responsavel 
-        ? Object.entries({
-            'Carolini Braguini': 4984,
-            'Melissa': 4986,
-            'Beatriz Angelo': 4988,
-            'Fernanda Raphaelly': 4990,
-            'Kerolay Oliveira': 4992,
-          }).find(([name]) => name === filters.responsavel)?.[1]
-        : undefined;
 
       const contacts = await bitrixApi.getContactsForExport(
-        filters.startDate, 
-        filters.endDate, 
-        responsavelId
+        filters.dataEnvioStart, 
+        filters.dataEnvioEnd
       );
 
       const XLSX = await import('xlsx');
@@ -54,7 +48,7 @@ export const useDashboard = () => {
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Contatos');
       
-      const fileName = `contatos_${filters.startDate.toISOString().split('T')[0]}_a_${filters.endDate.toISOString().split('T')[0]}.xlsx`;
+      const fileName = `contatos_envio_${filters.dataEnvioStart.toISOString().split('T')[0]}_a_${filters.dataEnvioEnd.toISOString().split('T')[0]}.xlsx`;
       
       XLSX.writeFile(workbook, fileName);
     } catch (error) {
@@ -62,7 +56,7 @@ export const useDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [filters, setLoading]);
+  }, [filters.dataEnvioStart, filters.dataEnvioEnd, setLoading]);
 
   useEffect(() => {
     fetchData();
