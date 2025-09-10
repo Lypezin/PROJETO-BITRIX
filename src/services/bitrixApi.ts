@@ -33,6 +33,13 @@ class BitrixApiService {
     dataLiberacaoStart: Date, 
     dataLiberacaoEnd: Date
   ): Promise<DashboardMetrics> {
+    console.log('🚀 BITRIX API getDashboardMetrics CHAMADO COM:', {
+      dataEnvioStart: dataEnvioStart.toISOString(),
+      dataEnvioEnd: dataEnvioEnd.toISOString(),
+      dataLiberacaoStart: dataLiberacaoStart.toISOString(),
+      dataLiberacaoEnd: dataLiberacaoEnd.toISOString()
+    });
+    
     try {
       const commands: { [key: string]: string } = {};
 
@@ -63,6 +70,8 @@ class BitrixApiService {
         commands[`enviados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, dataEnvioStart, dataEnvioEnd, userId);
         commands[`liberados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, dataLiberacaoStart, dataLiberacaoEnd, userId);
       }
+      
+      console.log('📋 COMANDOS BATCH GERADOS:', commands);
       
       const response = await this.callBitrixMethod('batch', { cmd: commands });
       

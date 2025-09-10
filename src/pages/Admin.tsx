@@ -18,12 +18,21 @@ export default function Admin() {
   });
 
   const handleApplyFilters = () => {
-    setFilters({
+    const newFilters = {
       dataEnvioStart: startOfDay(dataEnvioRange.start),
       dataEnvioEnd: endOfDay(dataEnvioRange.end),
       dataLiberacaoStart: startOfDay(dataLiberacaoRange.start),
       dataLiberacaoEnd: endOfDay(dataLiberacaoRange.end),
+    };
+    
+    console.log('🔧 ADMIN: Aplicando novos filtros:', {
+      dataEnvioStart: newFilters.dataEnvioStart.toISOString(),
+      dataEnvioEnd: newFilters.dataEnvioEnd.toISOString(),
+      dataLiberacaoStart: newFilters.dataLiberacaoStart.toISOString(),
+      dataLiberacaoEnd: newFilters.dataLiberacaoEnd.toISOString()
     });
+    
+    setFilters(newFilters);
   };
 
   const handleExport = () => {
