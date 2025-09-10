@@ -30,6 +30,7 @@ export interface DashboardMetrics {
 
 class BitrixApiService {
   private baseUrl = '/api/bitrix-proxy';
+  private isFetchingMetrics = false;
 
   async getDashboardMetrics(
     dataEnvioStart: Date, 
@@ -37,6 +38,12 @@ class BitrixApiService {
     dataLiberacaoStart: Date, 
     dataLiberacaoEnd: Date
   ): Promise<DashboardMetrics> {
+    if (this.isFetchingMetrics) {
+      console.warn('⚠️ Fetch de métricas já em andamento. Nova chamada ignorada.');
+      return Promise.reject(new Error('Fetch in progress'));
+    }
+
+    this.isFetchingMetrics = true;
     try {
       // 1. Buscar todos os contatos relevantes (esta chamada pode ser lenta)
       console.log('🔄 Iniciando busca de TODOS os contatos para filtragem manual...');
@@ -95,6 +102,8 @@ class BitrixApiService {
     } catch (error) {
       console.error('Erro ao obter métricas do dashboard:', error);
       throw error;
+    } finally {
+      this.isFetchingMetrics = false;
     }
   }
 

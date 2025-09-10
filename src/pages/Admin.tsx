@@ -25,13 +25,6 @@ export default function Admin() {
       dataLiberacaoEnd: endOfDay(dataLiberacaoRange.end),
     };
     
-    console.log('🔧 ADMIN: Aplicando novos filtros:', {
-      dataEnvioStart: newFilters.dataEnvioStart.toISOString(),
-      dataEnvioEnd: newFilters.dataEnvioEnd.toISOString(),
-      dataLiberacaoStart: newFilters.dataLiberacaoStart.toISOString(),
-      dataLiberacaoEnd: newFilters.dataLiberacaoEnd.toISOString()
-    });
-    
     setFilters(newFilters);
   };
 

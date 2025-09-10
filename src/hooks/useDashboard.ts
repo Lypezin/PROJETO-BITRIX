@@ -17,13 +17,6 @@ export const useDashboard = () => {
   } = useDashboardStore();
 
   const fetchData = useCallback(async () => {
-    console.log('🔄 FETCHDATA CHAMADO COM FILTROS:', {
-      dataEnvioStart: filters.dataEnvioStart.toISOString(),
-      dataEnvioEnd: filters.dataEnvioEnd.toISOString(),
-      dataLiberacaoStart: filters.dataLiberacaoStart.toISOString(),
-      dataLiberacaoEnd: filters.dataLiberacaoEnd.toISOString()
-    });
-    
     try {
       setLoading(true);
       const metrics = await bitrixApi.getDashboardMetrics(
@@ -32,12 +25,14 @@ export const useDashboard = () => {
         filters.dataLiberacaoStart,
         filters.dataLiberacaoEnd
       );
-      
-      console.log('📊 MÉTRICAS RECEBIDAS DO BITRIX:', metrics);
       setData(metrics);
       updateLastUpdate();
-    } catch (error) {
-      console.error('Erro ao buscar dados do dashboard:', error);
+    } catch (error: any) {
+      if (error?.message !== 'Fetch in progress') {
+        console.error('Erro ao buscar dados do dashboard:', error);
+      } else {
+        console.log('Chamada de busca de dados duplicada ignorada.');
+      }
     } finally {
       setLoading(false);
     }
