@@ -98,9 +98,12 @@ class BitrixApiService {
     const allContacts: any[] = [];
     let start = 0;
     const limit = 50;
+    let page = 1; // Para logging
 
     while (true) {
+      console.log(`[PAGINATION] Buscando página ${page}, start: ${start}...`);
       await this.waitForRateLimit();
+      
       const response = await this.callBitrixMethod('crm.contact.list', {
         start: start,
         limit: limit,
@@ -112,16 +115,23 @@ class BitrixApiService {
         ],
       });
 
+      console.log(`[PAGINATION] Resposta da página ${page}:`, response);
+
       const contacts = response.result || [];
       if (contacts.length > 0) {
         allContacts.push(...contacts);
       }
       
+      console.log(`[PAGINATION] Página ${page} retornou ${contacts.length} contatos. Total acumulado: ${allContacts.length}.`);
+      console.log(`[PAGINATION] Valor de 'response.next': ${response.next}`);
+
       if (contacts.length < limit || !response.next) {
+        console.log(`[PAGINATION] Condição de parada atingida. Encerrando busca.`);
         break;
       }
       
       start = response.next;
+      page++;
     }
     return allContacts;
   }
