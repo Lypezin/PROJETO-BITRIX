@@ -52,12 +52,9 @@ class BitrixApiService {
         nextDay.setDate(nextDay.getDate() + 1);
         nextDay.setHours(0, 0, 0, 0);
         
-        // TESTE: Usar operador de range específico do Bitrix24
         const filter: any = {
-          [`><${field}`]: [
-            formatDateTimeForBitrix(startOfDay),
-            formatDateTimeForBitrix(nextDay)
-          ]
+          [`>=${field}`]: formatDateTimeForBitrix(startOfDay),
+          [`<${field}`]: formatDateTimeForBitrix(nextDay)
         };
         
         if (userId) {
@@ -89,16 +86,8 @@ class BitrixApiService {
       
       console.log('📋 COMANDOS BATCH GERADOS:', commands);
       
-      // LOG DETALHADO DE UM COMANDO PARA DEBUG
-      console.log('🔍 COMANDO ENVIADOS DETALHADO:', commands['enviados_count']);
-      console.log('🔍 COMANDO LIBERADOS DETALHADO:', commands['liberados_count']);
-      
       const response = await this.callBitrixMethod('batch', { cmd: commands });
       
-      // LOG COMPLETO DA RESPOSTA PARA DEBUG
-      console.log('🔍 RESPOSTA COMPLETA DO BITRIX24:', JSON.stringify(response, null, 2));
-      
-      // CORREÇÃO FINAL: result_total TEM OS VALORES CORRETOS!
       const resultTotals = response.result.result_total;
       
       console.log('📊 RESULT_TOTALS ESPECÍFICOS:', resultTotals);
