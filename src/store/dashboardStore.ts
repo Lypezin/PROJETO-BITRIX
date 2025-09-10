@@ -13,10 +13,9 @@ export interface DashboardData {
 }
 
 export interface FilterState {
-  dataEnvioStart: Date;
-  dataEnvioEnd: Date;
-  dataLiberacaoStart: Date;
-  dataLiberacaoEnd: Date;
+  startDate: Date;
+  endDate: Date;
+  responsavel: string | null;
 }
 
 interface DashboardStore {
@@ -48,10 +47,9 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
     },
   },
   filters: {
-    dataEnvioStart: startOfDay(today),
-    dataEnvioEnd: endOfDay(today),
-    dataLiberacaoStart: startOfDay(today),
-    dataLiberacaoEnd: endOfDay(today),
+    startDate: startOfDay(today),
+    endDate: endOfDay(today),
+    responsavel: null,
   },
   isLoading: false,
   lastUpdate: null,
@@ -63,10 +61,9 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
   setLoading: (loading) => set({ isLoading: loading }),
   resetFilters: () => set({
     filters: {
-      dataEnvioStart: startOfDay(today),
-      dataEnvioEnd: endOfDay(today),
-      dataLiberacaoStart: startOfDay(today),
-      dataLiberacaoEnd: endOfDay(today),
+      startDate: startOfDay(today),
+      endDate: endOfDay(today),
+      responsavel: null,
     }
   }),
   updateLastUpdate: () => set({ lastUpdate: new Date() }),
