@@ -57,30 +57,15 @@ class BitrixApiService {
         return acc;
       }, {} as { [key: number]: string });
 
-      let debugLogCount = 0; // Para evitar poluir o console
-
       for (const contact of allContacts) {
+        // Checar Enviados
         const envioDateStr = contact[CUSTOM_FIELDS.DATA_ENVIO];
         if (envioDateStr) {
-          const envioDate = new Date(envioDateStr);
-          const envioTimestamp = envioDate.getTime();
-          const startTimestamp = dataEnvioStart.getTime();
-          const endTimestamp = dataEnvioEnd.getTime();
-
-          // Log detalhado APENAS para os 5 primeiros contatos com data
-          if (debugLogCount < 5) {
-            console.log('--- DEBUG DE COMPARAÇÃO DE DATA DE ENVIO ---');
-            console.log('Data (string) do Bitrix:', envioDateStr);
-            console.log('Data convertida para objeto Date:', envioDate);
-            console.log('Data de Início do Filtro:', dataEnvioStart);
-            console.log('Data de Fim do Filtro:', dataEnvioEnd);
-            console.log(`Comparando: ${envioTimestamp} >= ${startTimestamp} && ${envioTimestamp} <= ${endTimestamp}`);
-            console.log('Resultado da comparação:', envioTimestamp >= startTimestamp && envioTimestamp <= endTimestamp);
-            console.log('-------------------------------------------');
-            debugLogCount++;
-          }
-
-          if (envioTimestamp >= startTimestamp && envioTimestamp <= endTimestamp) {
+          // HOTFIX: Extrair apenas a data (YYYY-MM-DD) para evitar bugs de timezone na conversão
+          const datePart = envioDateStr.split('T')[0];
+          const envioDate = new Date(datePart.replace(/-/g, '/'));
+          
+          if (envioDate >= dataEnvioStart && envioDate <= dataEnvioEnd) {
             metrics.totalEnviados++;
             const responsibleName = responsibleUserIds[contact.ASSIGNED_BY_ID];
             if (responsibleName && metrics.responsaveis[responsibleName]) {
@@ -92,8 +77,11 @@ class BitrixApiService {
         // Checar Liberados
         const liberacaoDateStr = contact[CUSTOM_FIELDS.DATA_LIBERACAO];
         if (liberacaoDateStr) {
-          const liberacaoTimestamp = new Date(liberacaoDateStr).getTime();
-          if (liberacaoTimestamp >= dataLiberacaoStart.getTime() && liberacaoTimestamp <= dataLiberacaoEnd.getTime()) {
+          // HOTFIX: Extrair apenas a data (YYYY-MM-DD) para evitar bugs de timezone na conversão
+          const datePart = liberacaoDateStr.split('T')[0];
+          const liberacaoDate = new Date(datePart.replace(/-/g, '/'));
+
+          if (liberacaoDate >= dataLiberacaoStart && liberacaoDate <= dataLiberacaoEnd) {
             metrics.totalLiberados++;
             const responsibleName = responsibleUserIds[contact.ASSIGNED_BY_ID];
             if (responsibleName && metrics.responsaveis[responsibleName]) {
