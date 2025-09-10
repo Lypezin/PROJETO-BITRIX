@@ -117,16 +117,18 @@ class BitrixApiService {
       });
 
       const contacts = response.result || [];
+
       if (contacts.length > 0) {
         allContacts.push(...contacts);
       }
 
-      // Verifica se há mais páginas
-      if (response.next) {
-        start = response.next;
-      } else {
-        break; // Sai do loop se não houver mais páginas
+      // CRITICAL FIX: The loop must terminate if no more contacts are returned,
+      // regardless of whether a 'next' value is present.
+      if (contacts.length < limit || !response.next) {
+        break;
       }
+
+      start = response.next;
     }
 
     return allContacts;
@@ -220,7 +222,7 @@ class BitrixApiService {
 
     if (timeSinceLastCall < RATE_LIMIT_MS) {
       const waitTime = RATE_LIMIT_MS - timeSinceLastCall;
-      console.log(`Aguardando ${waitTime}ms para respeitar o rate limit...`);
+      // console.log(`Aguardando ${waitTime}ms para respeitar o rate limit...`); // Removido para limpar o console
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
     lastApiCall = Date.now();
