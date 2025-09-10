@@ -41,9 +41,9 @@ class BitrixApiService {
     });
     
     try {
-      const commands: { [key: string]: string } = {};
+      const commands: { [key: string]: any } = {};
 
-      const createFilterString = (field: string, start: Date, end: Date, userId?: number) => {
+      const createFilterCommand = (field: string, start: Date, end: Date, userId?: number) => {
         // Use "menor que o dia seguinte" para robustez de fuso horário
         const startOfDay = new Date(start);
         startOfDay.setHours(0, 0, 0, 0);
@@ -52,23 +52,39 @@ class BitrixApiService {
         nextDay.setDate(nextDay.getDate() + 1);
         nextDay.setHours(0, 0, 0, 0);
         
-        let filter = `filter[>=${field}]=${encodeURIComponent(formatDateTimeForBitrix(startOfDay))}&filter[<${field}]=${encodeURIComponent(formatDateTimeForBitrix(nextDay))}`;
+        // TESTE: Usar operador de range específico do Bitrix24
+        const filter: any = {
+          [`><${field}`]: [
+            formatDateTimeForBitrix(startOfDay),
+            formatDateTimeForBitrix(nextDay)
+          ]
+        };
+        
         if (userId) {
-          filter += `&filter[ASSIGNED_BY_ID]=${userId}`;
+          filter['ASSIGNED_BY_ID'] = userId;
         }
-        return `crm.contact.list?start=0&limit=1000&${filter}`;
+        
+        return {
+          method: 'crm.contact.list',
+          params: {
+            start: 0,
+            limit: 1000,
+            filter: filter,
+            select: ['ID'] // Só precisamos contar
+          }
+        };
       };
 
       // Enviados baseados na Data de Envio
-      commands['enviados_count'] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, dataEnvioStart, dataEnvioEnd);
+      commands['enviados_count'] = createFilterCommand(CUSTOM_FIELDS.DATA_ENVIO, dataEnvioStart, dataEnvioEnd);
       
       // Liberados baseados na Data de Liberação
-      commands['liberados_count'] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, dataLiberacaoStart, dataLiberacaoEnd);
+      commands['liberados_count'] = createFilterCommand(CUSTOM_FIELDS.DATA_LIBERACAO, dataLiberacaoStart, dataLiberacaoEnd);
 
       // Por responsável - enviados pela Data de Envio, liberados pela Data de Liberação
       for (const [name, userId] of Object.entries(RESPONSIBLE_USERS)) {
-        commands[`enviados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_ENVIO, dataEnvioStart, dataEnvioEnd, userId);
-        commands[`liberados_${name}`] = createFilterString(CUSTOM_FIELDS.DATA_LIBERACAO, dataLiberacaoStart, dataLiberacaoEnd, userId);
+        commands[`enviados_${name}`] = createFilterCommand(CUSTOM_FIELDS.DATA_ENVIO, dataEnvioStart, dataEnvioEnd, userId);
+        commands[`liberados_${name}`] = createFilterCommand(CUSTOM_FIELDS.DATA_LIBERACAO, dataLiberacaoStart, dataLiberacaoEnd, userId);
       }
       
       console.log('📋 COMANDOS BATCH GERADOS:', commands);
