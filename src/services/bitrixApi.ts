@@ -28,6 +28,7 @@ class BitrixApiService {
   private baseUrl = '/api/bitrix-proxy';
 
   async getDashboardMetrics(startDate: Date, endDate: Date): Promise<DashboardMetrics> {
+    console.log('🚀 [bitrixApi] Iniciando getDashboardMetrics com datas:', { startDate, endDate });
     try {
       const commands: { [key: string]: string } = {};
 
@@ -49,6 +50,8 @@ class BitrixApiService {
       
       const response = await this.callBitrixMethod('batch', { cmd: commands });
       
+      console.log('📦 [bitrixApi] Resposta do batch recebida:', response);
+      
       const resultTotals = response.result.result_total;
 
       const metrics: DashboardMetrics = {
@@ -64,6 +67,7 @@ class BitrixApiService {
           };
       }
 
+      console.log('📊 [bitrixApi] Métricas calculadas:', metrics);
       return metrics;
 
     } catch (error) {
@@ -134,11 +138,13 @@ class BitrixApiService {
   }
 
   private async callBitrixMethod(method: string, params: any = {}) {
+    console.log(`🔗 [bitrixApi] Chamando callBitrixMethod: ${method}`);
     try {
       const response = await axios.post(this.baseUrl, {
         method,
         params
       });
+      console.log(`📥 [bitrixApi] Resposta recebida para ${method}:`, response.data);
 
       if (response.data.error) {
         throw new Error(`Erro do Bitrix24: ${response.data.error_description}`);
