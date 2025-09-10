@@ -110,12 +110,6 @@ class BitrixApiService {
       const response = await this.callBitrixMethod('crm.contact.list', {
         start: start,
         limit: limit,
-        filter: {
-          // Otimização: busca apenas contatos que tenham uma das duas datas preenchidas.
-          'LOGIC': 'OR',
-          [`!${CUSTOM_FIELDS.DATA_ENVIO}`]: null,
-          [`!${CUSTOM_FIELDS.DATA_LIBERACAO}`]: null,
-        },
         select: [
           'ID',
           'ASSIGNED_BY_ID',
