@@ -110,6 +110,12 @@ class BitrixApiService {
       const response = await this.callBitrixMethod('crm.contact.list', {
         start: start,
         limit: limit,
+        filter: {
+          // Otimização: busca apenas contatos a partir de 01/06/2025.
+          'LOGIC': 'OR',
+          [`>=${CUSTOM_FIELDS.DATA_ENVIO}`]: '2025-06-01T00:00:00',
+          [`>=${CUSTOM_FIELDS.DATA_LIBERACAO}`]: '2025-06-01T00:00:00',
+        },
         select: [
           'ID',
           'ASSIGNED_BY_ID',
