@@ -4,8 +4,8 @@ import { useEffect, useCallback } from 'react';
 import { useDashboardStore } from '../store/dashboardStore';
 import { bitrixApi } from '../services/bitrixApi';
 import { database } from '../config/firebase';
-import { ref, onValue, set } from "firebase/database";
-import { DashboardFilters } from '../store/dashboardStore';
+import { ref, onValue, set, push, remove } from "firebase/database";
+import { DashboardFilters, CityData } from '../store/dashboardStore';
 
 export const useDashboard = () => {
   const { 
@@ -13,10 +13,12 @@ export const useDashboard = () => {
     filters, 
     isLoading, 
     lastUpdate,
+    cityData,
     setData, 
     setFilters: setLocalFilters, // Renomeia para evitar conflito
     setLoading, 
-    updateLastUpdate 
+    updateLastUpdate,
+    setCityData
   } = useDashboardStore();
 
   // Função para salvar filtros no Firebase
@@ -58,6 +60,38 @@ export const useDashboard = () => {
     // Limpa o listener quando o componente desmontar
     return () => unsubscribe();
   }, [setLocalFilters]);
+
+  // Efeito para ouvir mudanças nas cidades do Firebase
+  useEffect(() => {
+    const citiesRef = ref(database, 'cities');
+    const unsubscribe = onValue(citiesRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        // Firebase retorna um objeto com chaves, convertemos para array
+        const citiesArray: CityData[] = Object.keys(data).map(key => ({
+          id: key,
+          ...data[key]
+        }));
+        setCityData(citiesArray);
+      } else {
+        setCityData([]); // Limpa os dados se o nó estiver vazio
+      }
+    });
+
+    return () => unsubscribe();
+  }, [setCityData]);
+
+  const addCity = (name: string, value: string) => {
+    if (!name.trim() || !value.trim()) return;
+    const citiesRef = ref(database, 'cities');
+    const newCityRef = push(citiesRef);
+    set(newCityRef, { name, value });
+  };
+
+  const removeCity = (id: string) => {
+    const cityRef = ref(database, `cities/${id}`);
+    remove(cityRef);
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -128,8 +162,11 @@ export const useDashboard = () => {
     filters,
     isLoading,
     lastUpdate,
+    cityData,
     setFilters,
     fetchData,
     exportData,
+    addCity,
+    removeCity,
   };
 };

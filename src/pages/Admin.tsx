@@ -3,12 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { useDashboard } from '../hooks/useDashboard';
 import { format, startOfDay, endOfDay } from 'date-fns';
-import { Download, Filter, RefreshCw, Settings2, Calendar, FileSpreadsheet, Zap, Sparkles } from 'lucide-react';
+import { Download, Filter, RefreshCw, Settings2, Calendar, FileSpreadsheet, Zap, Sparkles, PlusCircle, Trash2, Map } from 'lucide-react';
 
 const formatDate = (date: Date) => format(date, "dd/MM/yyyy");
 
 export default function Admin() {
-  const { filters, setFilters, exportData, isLoading } = useDashboard();
+  const { 
+    filters, 
+    setFilters, 
+    exportData, 
+    isLoading, 
+    cityData, 
+    addCity, 
+    removeCity 
+  } = useDashboard();
+  
   const [dataEnvioRange, setDataEnvioRange] = useState({
     start: filters.dataEnvioStart,
     end: filters.dataEnvioEnd,
@@ -17,6 +26,8 @@ export default function Admin() {
     start: filters.dataLiberacaoStart,
     end: filters.dataLiberacaoEnd,
   });
+  const [cityName, setCityName] = useState('');
+  const [cityValue, setCityValue] = useState('');
 
   const handleApplyFilters = () => {
     setFilters({
@@ -29,6 +40,12 @@ export default function Admin() {
 
   const handleExport = () => {
     exportData();
+  };
+
+  const handleAddCity = () => {
+    addCity(cityName, cityValue);
+    setCityName('');
+    setCityValue('');
   };
 
   return (
@@ -206,8 +223,8 @@ export default function Admin() {
         </div>
 
         {/* Status e Exportação Premium */}
-        <div className="space-y-6">
-          <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 text-white shadow-2xl hover:shadow-emerald-500/25 transition-all duration-500 hover:scale-[1.02] animate-in slide-in-from-right duration-700">
+        <div className="space-y-8">
+          <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 text-white shadow-2xl">
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
             <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-white/10 blur-2xl group-hover:bg-white/20 transition-all duration-500"></div>
             
@@ -264,6 +281,64 @@ export default function Admin() {
                     Exportação baseada no período de <strong>Data de Envio</strong>
                   </span>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Gerenciador de Cidades */}
+          <Card className="group relative overflow-hidden border-0 bg-white/80 backdrop-blur-xl shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-50/50 to-orange-50/50"></div>
+            <CardHeader className="relative z-10">
+              <CardTitle className="flex items-center space-x-3 text-xl">
+                <div className="p-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 shadow-lg">
+                  <Map className="h-6 w-6 text-white" />
+                </div>
+                <span className="font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                  Gerenciar Cidades
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    placeholder="Nome da Cidade"
+                    value={cityName}
+                    onChange={(e) => setCityName(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-amber-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300 bg-amber-50/50 hover:bg-amber-50 font-medium"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Valor"
+                    value={cityValue}
+                    onChange={(e) => setCityValue(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-amber-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300 bg-amber-50/50 hover:bg-amber-50 font-medium"
+                  />
+                </div>
+                <Button
+                  onClick={handleAddCity}
+                  className="w-full group relative bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg transition-all duration-300 border-0 py-3 rounded-2xl font-semibold text-base"
+                >
+                  <div className="relative flex items-center justify-center space-x-2">
+                    <PlusCircle className="h-5 w-5" />
+                    <span>Adicionar Cidade</span>
+                  </div>
+                </Button>
+              </div>
+
+              <div className="mt-6 space-y-2">
+                {cityData.length > 0 && cityData.map(city => (
+                  <div key={city.id} className="flex justify-between items-center bg-white/50 p-3 rounded-xl border border-gray-200">
+                    <div>
+                      <span className="font-bold text-gray-800">{city.name}</span>
+                      <span className="text-gray-600">: {city.value}</span>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => removeCity(city.id)} className="text-red-500 hover:bg-red-100 hover:text-red-600">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

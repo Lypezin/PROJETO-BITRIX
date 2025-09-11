@@ -19,11 +19,18 @@ export interface DashboardFilters {
   dataLiberacaoEnd: Date;
 }
 
+export interface CityData {
+  id: string;
+  name: string;
+  value: string;
+}
+
 interface DashboardStore {
   data: DashboardData;
   filters: DashboardFilters;
   isLoading: boolean;
   lastUpdate: Date | null;
+  cityData: CityData[];
   
   // Actions
   setData: (data: DashboardData) => void;
@@ -31,6 +38,7 @@ interface DashboardStore {
   setLoading: (loading: boolean) => void;
   resetFilters: () => void;
   updateLastUpdate: () => void;
+  setCityData: (cities: CityData[]) => void;
 }
 
 const today = new Date();
@@ -55,19 +63,22 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
   },
   isLoading: false,
   lastUpdate: null,
+  cityData: [],
 
   setData: (data) => set({ data }),
   setFilters: (newFilters) => set((state) => ({
     filters: { ...state.filters, ...newFilters }
   })),
   setLoading: (loading) => set({ isLoading: loading }),
-  resetFilters: () => set({
+  resetFilters: () => set((state) => ({
+    ...state,
     filters: {
-      dataEnvioStart: startOfDay(today),
-      dataEnvioEnd: endOfDay(today),
-      dataLiberacaoStart: startOfDay(today),
-      dataLiberacaoEnd: endOfDay(today),
+      dataEnvioStart: startOfDay(new Date()),
+      dataEnvioEnd: endOfDay(new Date()),
+      dataLiberacaoStart: startOfDay(new Date()),
+      dataLiberacaoEnd: endOfDay(new Date()),
     }
-  }),
+  })),
   updateLastUpdate: () => set({ lastUpdate: new Date() }),
+  setCityData: (cities) => set({ cityData: cities }),
 }));

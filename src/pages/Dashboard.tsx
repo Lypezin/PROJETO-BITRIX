@@ -2,10 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { useDashboard } from '../hooks/useDashboard';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Users, CheckCircle, Clock, TrendingUp, Award } from 'lucide-react';
+import { Users, CheckCircle, Clock, TrendingUp, Award, MapPin, DollarSign } from 'lucide-react';
 
 export default function Dashboard() {
-  const { data, filters, isLoading } = useDashboard();
+  const { data, filters, isLoading, cityData } = useDashboard();
 
   const responsaveis = [
     'Carolini Braguini',
@@ -131,6 +131,46 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Seção de Cidades */}
+      {cityData && cityData.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 blur-lg opacity-50"></div>
+              <div className="relative p-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 shadow-lg">
+                <MapPin className="h-5 w-5 text-white" />
+              </div>
+            </div>
+            <h2 className="text-xl font-black bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              Valores por Cidade
+            </h2>
+          </div>
+          <div className="grid grid-cols-5 gap-4">
+            {cityData.map((city) => (
+              <Card key={city.id} className="relative overflow-hidden border-0 bg-white shadow-xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-600 opacity-8"></div>
+                <div className="absolute -top-2 -right-2 h-12 w-12 rounded-full bg-white/10 blur-lg"></div>
+                <CardHeader className="relative z-10 flex flex-row items-center space-x-3 pb-2">
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-lg bg-amber-500 blur-md opacity-50"></div>
+                    <div className="relative p-2 rounded-lg bg-amber-500 shadow-md">
+                      <MapPin className="h-4 w-4 text-white" />
+                    </div>
+                  </div>
+                  <CardTitle className="text-sm font-bold text-gray-800">{city.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <div className="flex items-center space-x-2">
+                    <DollarSign className="h-5 w-5 text-amber-700" />
+                    <span className="text-2xl font-black text-amber-800">{city.value}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Cards dos Responsáveis Premium para TV */}
       <div className="space-y-4">
