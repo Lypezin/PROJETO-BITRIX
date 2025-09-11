@@ -12,7 +12,7 @@ export interface DashboardData {
   };
 }
 
-export interface FilterState {
+export interface DashboardFilters {
   dataEnvioStart: Date;
   dataEnvioEnd: Date;
   dataLiberacaoStart: Date;
@@ -21,13 +21,13 @@ export interface FilterState {
 
 interface DashboardStore {
   data: DashboardData;
-  filters: FilterState;
+  filters: DashboardFilters;
   isLoading: boolean;
   lastUpdate: Date | null;
   
   // Actions
   setData: (data: DashboardData) => void;
-  setFilters: (filters: Partial<FilterState>) => void;
+  setFilters: (filters: Partial<DashboardFilters>) => void;
   setLoading: (loading: boolean) => void;
   resetFilters: () => void;
   updateLastUpdate: () => void;

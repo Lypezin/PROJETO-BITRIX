@@ -3,6 +3,9 @@
 import { useEffect, useCallback } from 'react';
 import { useDashboardStore } from '../store/dashboardStore';
 import { bitrixApi } from '../services/bitrixApi';
+import { database } from '../config/firebase';
+import { ref, onValue, set } from "firebase/database";
+import { DashboardFilters } from '../store/dashboardStore';
 
 export const useDashboard = () => {
   const { 
@@ -11,10 +14,50 @@ export const useDashboard = () => {
     isLoading, 
     lastUpdate,
     setData, 
-    setFilters,
+    setFilters: setLocalFilters, // Renomeia para evitar conflito
     setLoading, 
     updateLastUpdate 
   } = useDashboardStore();
+
+  // Função para salvar filtros no Firebase
+  const setFilters = useCallback((newFilters: Partial<DashboardFilters>) => {
+    const filtersRef = ref(database, 'filters');
+    // Mantém os filtros existentes e atualiza com os novos
+    const updatedFilters = { ...filters, ...newFilters };
+    
+    // Converte datas para string antes de salvar, pois o Firebase não armazena `Date`
+    const filtersToSave = {
+      ...updatedFilters,
+      dataEnvioStart: updatedFilters.dataEnvioStart.toISOString(),
+      dataEnvioEnd: updatedFilters.dataEnvioEnd.toISOString(),
+      dataLiberacaoStart: updatedFilters.dataLiberacaoStart.toISOString(),
+      dataLiberacaoEnd: updatedFilters.dataLiberacaoEnd.toISOString(),
+    };
+
+    set(filtersRef, filtersToSave);
+  }, [filters]);
+
+  // Efeito para ouvir mudanças nos filtros do Firebase
+  useEffect(() => {
+    const filtersRef = ref(database, 'filters');
+    const unsubscribe = onValue(filtersRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        // Converte as strings de data de volta para objetos `Date`
+        const filtersFromDb = {
+          ...data,
+          dataEnvioStart: new Date(data.dataEnvioStart),
+          dataEnvioEnd: new Date(data.dataEnvioEnd),
+          dataLiberacaoStart: new Date(data.dataLiberacaoStart),
+          dataLiberacaoEnd: new Date(data.dataLiberacaoEnd),
+        };
+        setLocalFilters(filtersFromDb);
+      }
+    });
+
+    // Limpa o listener quando o componente desmontar
+    return () => unsubscribe();
+  }, [setLocalFilters]);
 
   const fetchData = useCallback(async () => {
     try {
