@@ -127,37 +127,37 @@ export default function Dashboard() {
             const textColors = ['text-blue-800','text-purple-800','text-green-800','text-orange-800','text-pink-800'];
             return (
               <Card key={responsavel} className={`flex flex-col bg-gradient-to-br ${cardColors[index % cardColors.length]} shadow-md hover:shadow-lg transition-all duration-200`}>
-                <CardHeader className="flex flex-col items-center space-y-1 p-3">
-                  <CardTitle className={`text-base font-bold ${textColors[index % textColors.length]} text-center`}>{responsavel}</CardTitle>
+                <CardHeader className="flex flex-col items-center p-2">
+                  <CardTitle className={`text-sm font-bold ${textColors[index % textColors.length]} text-center`}>{responsavel}</CardTitle>
                 </CardHeader>
-                <CardContent className="flex-grow px-3 pb-3 space-y-2">
+                <CardContent className="flex-grow px-2 pb-2 space-y-1">
                   {/* Enviados Detalhado */}
-                  <div className="flex-1 bg-white/70 backdrop-blur-sm rounded-lg p-2 space-y-1">
+                  <div className="bg-white/70 backdrop-blur-sm rounded-lg p-1.5 space-y-1">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-600 font-medium">Enviados</span>
+                      <span className="text-xs text-gray-600 font-semibold">Enviados</span>
                       <span className={`text-sm font-bold ${textColors[index % textColors.length]}`}>{dados.totalEnviados}</span>
                     </div>
-                    <div className="border-t border-gray-200/50 my-1"></div>
-                    <div className="space-y-0.5 text-[11px] font-medium text-gray-700">
+                    <div className="border-t border-gray-200/50"></div>
+                    <div className="text-[10px] font-medium text-gray-700 h-10 overflow-y-auto">
                       {Object.entries(dados.enviadosPorCidade).map(([cidade, count]: [string, number]) => (
                         <div key={cidade} className="flex justify-between items-center">
-                          <span className="truncate max-w-[80px]">{cidade}</span>
+                          <span className="truncate max-w-[70px]">{cidade}</span>
                           <span className={`font-semibold ${textColors[index % textColors.length]}`}>{count}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                   {/* Liberados Detalhado */}
-                  <div className="flex-1 bg-white/70 backdrop-blur-sm rounded-lg p-2 space-y-1">
+                  <div className="bg-white/70 backdrop-blur-sm rounded-lg p-1.5 space-y-1">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-600 font-medium">Liberados</span>
+                      <span className="text-xs text-gray-600 font-semibold">Liberados</span>
                       <span className={`text-sm font-bold ${textColors[index % textColors.length]}`}>{dados.totalLiberados}</span>
                     </div>
-                    <div className="border-t border-gray-200/50 my-1"></div>
-                    <div className="space-y-0.5 text-[11px] font-medium text-gray-700">
+                    <div className="border-t border-gray-200/50"></div>
+                    <div className="text-[10px] font-medium text-gray-700 h-10 overflow-y-auto">
                       {Object.entries(dados.liberadosPorCidade).map(([cidade, count]: [string, number]) => (
                         <div key={cidade} className="flex justify-between items-center">
-                          <span className="truncate max-w-[80px]">{cidade}</span>
+                          <span className="truncate max-w-[70px]">{cidade}</span>
                           <span className={`font-semibold ${textColors[index % textColors.length]}`}>{count}</span>
                         </div>
                       ))}

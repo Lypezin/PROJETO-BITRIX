@@ -38,6 +38,32 @@ export interface DashboardMetrics {
 class BitrixApiService {
   private baseUrl = '/api/bitrix-proxy';
   private isFetchingMetrics = false;
+  private cityFieldCache: { [key: string]: string } | null = null;
+
+  private async getCityNameFromId(cityId: string): Promise<string> {
+    if (!this.cityFieldCache) {
+      try {
+        console.log('🔄 Buscando mapeamento de IDs de cidade...');
+        const response = await this.callBitrixMethod('crm.contact.fields');
+        const cityFieldData = response.result[CUSTOM_FIELDS.CIDADE];
+        
+        if (cityFieldData && cityFieldData.items) {
+          this.cityFieldCache = cityFieldData.items.reduce((acc: any, item: any) => {
+            acc[item.ID] = item.VALUE;
+            return acc;
+          }, {});
+          console.log('✅ Mapeamento de cidades carregado e cacheado.');
+        } else {
+          this.cityFieldCache = {}; // Cache vazio para evitar novas tentativas
+        }
+      } catch (error) {
+        console.error("Erro ao buscar mapeamento de cidades:", error);
+        this.cityFieldCache = {}; // Previne chamadas repetidas em caso de erro
+        return "Erro Cidades";
+      }
+    }
+    return this.cityFieldCache[cityId] || cityId;
+  }
 
   async getDashboardMetrics(
     dataEnvioStart: Date,
@@ -94,7 +120,8 @@ class BitrixApiService {
         const responsibleName = responsibleUserIds[contact.ASSIGNED_BY_ID];
         if (responsibleName && metrics.responsaveis[responsibleName]) {
           metrics.responsaveis[responsibleName].totalEnviados++;
-          const cidade = contact[CUSTOM_FIELDS.CIDADE] || 'Não especificado';
+          const cityId = contact[CUSTOM_FIELDS.CIDADE];
+          const cidade = cityId ? await this.getCityNameFromId(cityId) : 'Não especificado';
           metrics.responsaveis[responsibleName].enviadosPorCidade[cidade] = 
             (metrics.responsaveis[responsibleName].enviadosPorCidade[cidade] || 0) + 1;
         }
@@ -104,7 +131,8 @@ class BitrixApiService {
         const responsibleName = responsibleUserIds[contact.ASSIGNED_BY_ID];
         if (responsibleName && metrics.responsaveis[responsibleName]) {
           metrics.responsaveis[responsibleName].totalLiberados++;
-          const cidade = contact[CUSTOM_FIELDS.CIDADE] || 'Não especificado';
+          const cityId = contact[CUSTOM_FIELDS.CIDADE];
+          const cidade = cityId ? await this.getCityNameFromId(cityId) : 'Não especificado';
           metrics.responsaveis[responsibleName].liberadosPorCidade[cidade] = 
             (metrics.responsaveis[responsibleName].liberadosPorCidade[cidade] || 0) + 1;
         }
