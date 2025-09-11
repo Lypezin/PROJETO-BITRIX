@@ -6,8 +6,10 @@ export interface DashboardData {
   totalLiberados: number;
   responsaveis: {
     [key: string]: {
-      enviados: number;
-      liberados: number;
+      totalEnviados: number;
+      totalLiberados: number;
+      enviadosPorCidade: { [cidade: string]: number };
+      liberadosPorCidade: { [cidade: string]: number };
     };
   };
 }
@@ -48,11 +50,11 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
     totalEnviados: 0,
     totalLiberados: 0,
     responsaveis: {
-      'Carolini Braguini': { enviados: 0, liberados: 0 },
-      'Melissa': { enviados: 0, liberados: 0 },
-      'Beatriz Angelo': { enviados: 0, liberados: 0 },
-      'Fernanda Raphaelly': { enviados: 0, liberados: 0 },
-      'Kerolay Oliveira': { enviados: 0, liberados: 0 },
+      'Carolini Braguini': { totalEnviados: 0, totalLiberados: 0, enviadosPorCidade: {}, liberadosPorCidade: {} },
+      'Melissa': { totalEnviados: 0, totalLiberados: 0, enviadosPorCidade: {}, liberadosPorCidade: {} },
+      'Beatriz Angelo': { totalEnviados: 0, totalLiberados: 0, enviadosPorCidade: {}, liberadosPorCidade: {} },
+      'Fernanda Raphaelly': { totalEnviados: 0, totalLiberados: 0, enviadosPorCidade: {}, liberadosPorCidade: {} },
+      'Kerolay Oliveira': { totalEnviados: 0, totalLiberados: 0, enviadosPorCidade: {}, liberadosPorCidade: {} },
     },
   },
   filters: {

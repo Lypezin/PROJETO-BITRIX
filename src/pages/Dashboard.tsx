@@ -139,7 +139,7 @@ export default function Dashboard() {
                     </div>
                     <div className="border-t border-gray-200/50 my-1"></div>
                     <div className="space-y-0.5 text-[11px] font-medium text-gray-700">
-                      {Object.entries(dados.enviadosPorCidade).map(([cidade, count]) => (
+                      {Object.entries(dados.enviadosPorCidade).map(([cidade, count]: [string, number]) => (
                         <div key={cidade} className="flex justify-between items-center">
                           <span className="truncate max-w-[80px]">{cidade}</span>
                           <span className={`font-semibold ${textColors[index % textColors.length]}`}>{count}</span>
@@ -155,7 +155,7 @@ export default function Dashboard() {
                     </div>
                     <div className="border-t border-gray-200/50 my-1"></div>
                     <div className="space-y-0.5 text-[11px] font-medium text-gray-700">
-                      {Object.entries(dados.liberadosPorCidade).map(([cidade, count]) => (
+                      {Object.entries(dados.liberadosPorCidade).map(([cidade, count]: [string, number]) => (
                         <div key={cidade} className="flex justify-between items-center">
                           <span className="truncate max-w-[80px]">{cidade}</span>
                           <span className={`font-semibold ${textColors[index % textColors.length]}`}>{count}</span>
