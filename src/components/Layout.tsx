@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
-import { BarChart3, Settings, RefreshCw, Sparkles, Activity } from 'lucide-react';
+import { BarChart3, Settings, RefreshCw, Activity } from 'lucide-react';
 import { useDashboard } from '../hooks/useDashboard';
 
 interface LayoutProps {
