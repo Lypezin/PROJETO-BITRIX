@@ -64,7 +64,7 @@ class BitrixApiService {
         const status = contact[CUSTOM_FIELDS.STATUS];
 
         // Lógica de exclusão: conta se o status não estiver na lista de exclusão
-        if (envioDateStr && status && !STATUS_VALUES.EXCLUIR_ENVIO.includes(status)) {
+        if (envioDateStr && status && !STATUS_VALUES.EXCLUIR_ENVIO.includes(status.trim())) {
           const datePart = envioDateStr.split('T')[0];
           const envioDate = startOfDay(new Date(datePart.replace(/-/g, '/')));
           
@@ -94,6 +94,7 @@ class BitrixApiService {
       }
 
       console.log('📊 Métricas FINAIS calculadas manualmente:', metrics);
+      console.log('DEBUG V3: Lógica de exclusão de status em execução.'); // Prova de deploy
       return metrics;
 
     } catch (error) {
