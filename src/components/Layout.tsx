@@ -16,6 +16,8 @@ export default function Layout({ children }: LayoutProps) {
     return date.toLocaleTimeString('pt-BR');
   };
 
+  const isDashboard = location.pathname === '/';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Header com gradiente */}
@@ -101,8 +103,11 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </header>
 
-      {/* Main Content otimizado para TV */}
-      <main className="max-w-full mx-auto py-4 px-6 h-[calc(100vh-5rem)] overflow-hidden">
+      {/* Main Content condicional para TV */}
+      <main className={isDashboard 
+        ? "max-w-full mx-auto py-4 px-6 h-[calc(100vh-80px)] overflow-hidden" 
+        : "max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8"
+      }>
         {children}
       </main>
     </div>
