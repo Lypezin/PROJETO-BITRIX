@@ -133,7 +133,7 @@ const renderResponsavelCard = (responsavel: string, index: number, data: any) =>
             <span className={`text-xs font-bold ${textColors[index % textColors.length]}`}>{dados.totalEnviados}</span>
           </div>
           <div className="text-[9px] font-medium text-gray-700 h-8 overflow-y-auto">
-            {Object.entries(dados.enviadosPorCidade).map(([cidade, count]: [string, number]) => (
+            {Object.entries(dados.enviadosPorCidade).map(([cidade, count]: [string, any]) => (
               <div key={cidade} className="flex justify-between items-center">
                 <span className="truncate max-w-[50px]">{cidade}</span>
                 <span className={`font-semibold ${textColors[index % textColors.length]}`}>{count}</span>
@@ -148,7 +148,7 @@ const renderResponsavelCard = (responsavel: string, index: number, data: any) =>
             <span className={`text-xs font-bold ${textColors[index % textColors.length]}`}>{dados.totalLiberados}</span>
           </div>
           <div className="text-[9px] font-medium text-gray-700 h-8 overflow-y-auto">
-            {Object.entries(dados.liberadosPorCidade).map(([cidade, count]: [string, number]) => (
+            {Object.entries(dados.liberadosPorCidade).map(([cidade, count]: [string, any]) => (
               <div key={cidade} className="flex justify-between items-center">
                 <span className="truncate max-w-[50px]">{cidade}</span>
                 <span className={`font-semibold ${textColors[index % textColors.length]}`}>{count}</span>
