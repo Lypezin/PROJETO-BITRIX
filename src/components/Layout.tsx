@@ -24,8 +24,8 @@ export default function Layout({ children }: LayoutProps) {
         <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-gradient-to-r from-blue-400/20 to-purple-400/20 blur-2xl"></div>
         <div className="absolute -bottom-4 -left-4 h-32 w-32 rounded-full bg-gradient-to-r from-pink-400/20 to-indigo-400/20 blur-2xl"></div>
         
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+        <div className="relative z-10 max-w-full mx-auto px-6">
+          <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-8">
               <div className="flex items-center space-x-3">
                 <div className="relative">
@@ -81,21 +81,18 @@ export default function Layout({ children }: LayoutProps) {
             <div className="flex items-center space-x-4">
               <div className="hidden sm:block text-sm text-gray-600 bg-white/50 backdrop-blur-sm px-3 py-2 rounded-xl border border-white/20">
                 <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
                   <span className="font-medium">Última atualização: {formatLastUpdate(lastUpdate)}</span>
                 </div>
               </div>
               <Button
-                className={`group relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 border-0 ${
-                  isLoading ? 'animate-pulse' : 'hover:scale-105'
-                }`}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg border-0"
                 size="sm"
                 onClick={fetchData}
                 disabled={isLoading}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative flex items-center space-x-2">
-                  <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+                <div className="flex items-center space-x-2">
+                  <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                   <span className="font-semibold">Atualizar</span>
                 </div>
               </Button>
@@ -104,13 +101,8 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </header>
 
-      {/* Main Content com fundo animado */}
-      <main className="relative max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pink-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '4s' }}></div>
-        </div>
+      {/* Main Content otimizado para TV */}
+      <main className="max-w-full mx-auto py-4 px-6 h-[calc(100vh-5rem)] overflow-hidden">
         {children}
       </main>
     </div>
