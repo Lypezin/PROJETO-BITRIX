@@ -50,43 +50,43 @@ export default function Admin() {
 
   return (
     <div className="space-y-6">
-      {/* Header Clean */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+      {/* Header com cores sutis */}
+      <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl border border-slate-200 p-6 shadow-md">
         <div className="flex items-center space-x-4">
-          <div className="p-3 rounded-lg bg-slate-100">
-            <Settings2 className="h-8 w-8 text-slate-700" />
+          <div className="p-3 rounded-lg bg-slate-700 shadow-lg">
+            <Settings2 className="h-8 w-8 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-slate-900">
               Painel de Administração
             </h1>
-            <p className="text-gray-600 text-sm mt-1">
+            <p className="text-slate-700 text-sm mt-1">
               Configure filtros avançados e exporte dados em tempo real
             </p>
           </div>
         </div>
         
         <div className="mt-4 flex items-center space-x-4">
-          <div className="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+          <div className="flex items-center space-x-2 bg-yellow-100 px-3 py-2 rounded-lg border border-yellow-300 shadow-sm">
             <Sparkles className="h-4 w-4 text-yellow-600" />
-            <span className="text-sm font-medium text-gray-700">Sistema Integrado Bitrix24</span>
+            <span className="text-sm font-medium text-yellow-800">Sistema Integrado Bitrix24</span>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-gradient-to-br from-white to-blue-50 border border-blue-200 shadow-md">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center space-x-3 text-lg">
-                <div className="p-2 rounded-lg bg-blue-100">
-                  <Filter className="h-5 w-5 text-blue-600" />
+                <div className="p-2 rounded-lg bg-blue-600 shadow-lg">
+                  <Filter className="h-5 w-5 text-white" />
                 </div>
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-blue-900">
                   Configuração de Filtros
                 </span>
               </CardTitle>
-              <p className="text-gray-600 text-sm mt-1">Defina períodos personalizados para análise detalhada</p>
+              <p className="text-blue-700 text-sm mt-1">Defina períodos personalizados para análise detalhada</p>
             </CardHeader>
             
             <CardContent className="space-y-6">
@@ -207,15 +207,15 @@ export default function Admin() {
 
         {/* Exportação de Dados */}
         <div className="space-y-6">
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-gradient-to-br from-emerald-50 to-green-100 border border-emerald-200 shadow-md">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-emerald-100">
-                  <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
+                <div className="p-2 rounded-lg bg-emerald-600 shadow-lg">
+                  <FileSpreadsheet className="h-5 w-5 text-white" />
                 </div>
-                <span className="font-semibold text-gray-900">Exportação de Dados</span>
+                <span className="font-semibold text-emerald-900">Exportação de Dados</span>
               </CardTitle>
-              <p className="text-gray-600 text-sm">Baixe relatórios completos em Excel</p>
+              <p className="text-emerald-700 text-sm">Baixe relatórios completos em Excel</p>
             </CardHeader>
             
             <CardContent className="space-y-4">
@@ -265,15 +265,15 @@ export default function Admin() {
             </CardContent>
           </Card>
 
-          {/* Gerenciador de Cidades */}
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          {/* Gerenciador de Custos por Cidade */}
+          <Card className="bg-gradient-to-br from-orange-50 to-amber-100 border border-orange-200 shadow-md">
             <CardHeader>
               <CardTitle className="flex items-center space-x-3 text-lg">
-                <div className="p-2 rounded-lg bg-orange-100">
-                  <Map className="h-5 w-5 text-orange-600" />
+                <div className="p-2 rounded-lg bg-orange-500 shadow-lg">
+                  <Map className="h-5 w-5 text-white" />
                 </div>
-                <span className="font-semibold text-gray-900">
-                  Gerenciar Cidades
+                <span className="font-semibold text-orange-900">
+                  Gerenciar Custos por Cidade
                 </span>
               </CardTitle>
             </CardHeader>
@@ -285,33 +285,33 @@ export default function Admin() {
                     placeholder="Nome da Cidade"
                     value={cityName}
                     onChange={(e) => setCityName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
+                    className="w-full px-3 py-2 border border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white/70 transition-colors duration-200"
                   />
                   <input
                     type="text"
-                    placeholder="Valor"
+                    placeholder="Custo (R$)"
                     value={cityValue}
                     onChange={(e) => setCityValue(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
+                    className="w-full px-3 py-2 border border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white/70 transition-colors duration-200"
                   />
                 </div>
                 <Button
                   onClick={handleAddCity}
-                  className="w-full bg-orange-600 hover:bg-orange-700 text-white transition-colors duration-200 py-2.5 px-4 rounded-lg font-medium"
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white transition-colors duration-200 py-2.5 px-4 rounded-lg font-medium shadow-md"
                 >
                   <div className="flex items-center justify-center space-x-2">
                     <PlusCircle className="h-4 w-4" />
-                    <span>Adicionar Cidade</span>
+                    <span>Adicionar Custo</span>
                   </div>
                 </Button>
               </div>
 
               <div className="mt-6 space-y-2">
                 {cityData.length > 0 && cityData.map(city => (
-                  <div key={city.id} className="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-200">
+                  <div key={city.id} className="flex justify-between items-center bg-white/70 p-3 rounded-lg border border-orange-300 shadow-sm">
                     <div>
-                      <span className="font-semibold text-gray-900">{city.name}</span>
-                      <span className="text-gray-600">: R$ {city.value}</span>
+                      <span className="font-semibold text-orange-900">{city.name}</span>
+                      <span className="text-orange-700">: R$ {city.value}</span>
                     </div>
                     <Button variant="ghost" size="icon" onClick={() => removeCity(city.id)} className="text-red-500 hover:bg-red-100 hover:text-red-600">
                       <Trash2 className="h-4 w-4" />

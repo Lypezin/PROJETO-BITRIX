@@ -29,81 +29,81 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col h-full gap-4 p-4">
-      {/* Header Clean */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex-shrink-0">
+      {/* Header com cores sutis */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-4 shadow-sm flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-slate-100"><TrendingUp className="h-5 w-5 text-slate-700" /></div>
+            <div className="p-2 rounded-lg bg-blue-600 shadow-lg"><TrendingUp className="h-5 w-5 text-white" /></div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900">Dashboard de Performance</h1>
-              <p className="text-gray-500 text-sm">Análise Bitrix24</p>
+              <h1 className="text-lg font-bold text-blue-900">Dashboard de Performance</h1>
+              <p className="text-blue-700 text-sm">Análise Bitrix24</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
-              <span className="text-xs font-medium text-gray-600">Envio</span>
-              <p className="text-gray-900 font-semibold text-sm">{formatDate(filters.dataEnvioStart)} - {formatDate(filters.dataEnvioEnd)}</p>
+            <div className="bg-blue-100 rounded-lg p-3 text-center border border-blue-300">
+              <span className="text-xs font-medium text-blue-700">Envio</span>
+              <p className="text-blue-900 font-semibold text-sm">{formatDate(filters.dataEnvioStart)} - {formatDate(filters.dataEnvioEnd)}</p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
-              <span className="text-xs font-medium text-gray-600">Liberação</span>
-              <p className="text-gray-900 font-semibold text-sm">{formatDate(filters.dataLiberacaoStart)} - {formatDate(filters.dataLiberacaoEnd)}</p>
+            <div className="bg-indigo-100 rounded-lg p-3 text-center border border-indigo-300">
+              <span className="text-xs font-medium text-indigo-700">Liberação</span>
+              <p className="text-indigo-900 font-semibold text-sm">{formatDate(filters.dataLiberacaoStart)} - {formatDate(filters.dataLiberacaoEnd)}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Cards Totais Clean */}
+      {/* Cards Totais com cores sutis */}
       <div className="flex-shrink-0 grid grid-cols-2 gap-4">
-        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+        <Card className="bg-gradient-to-br from-cyan-50 to-blue-100 border border-cyan-200 shadow-md hover:shadow-lg transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-            <CardTitle className="text-sm font-semibold text-gray-700">Total de Enviados</CardTitle>
-            <div className="p-2 rounded-lg bg-blue-50"><Users className="h-5 w-5 text-blue-600" /></div>
+            <CardTitle className="text-sm font-semibold text-cyan-800">Total de Enviados</CardTitle>
+            <div className="p-2 rounded-lg bg-cyan-600 shadow-lg"><Users className="h-5 w-5 text-white" /></div>
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <div className="text-4xl font-bold text-gray-900">{data.totalEnviados.toLocaleString('pt-BR')}</div>
-            <p className="text-sm text-gray-600">Contatos no período</p>
+            <div className="text-4xl font-bold text-cyan-900">{data.totalEnviados.toLocaleString('pt-BR')}</div>
+            <p className="text-sm text-cyan-700">Contatos no período</p>
           </CardContent>
         </Card>
-        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+        <Card className="bg-gradient-to-br from-emerald-50 to-green-100 border border-emerald-200 shadow-md hover:shadow-lg transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-            <CardTitle className="text-sm font-semibold text-gray-700">Total de Liberados</CardTitle>
-            <div className="p-2 rounded-lg bg-emerald-50"><CheckCircle className="h-5 w-5 text-emerald-600" /></div>
+            <CardTitle className="text-sm font-semibold text-emerald-800">Total de Liberados</CardTitle>
+            <div className="p-2 rounded-lg bg-emerald-600 shadow-lg"><CheckCircle className="h-5 w-5 text-white" /></div>
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <div className="text-4xl font-bold text-gray-900">{data.totalLiberados.toLocaleString('pt-BR')}</div>
-            <p className="text-sm text-gray-600">Contatos no período</p>
+            <div className="text-4xl font-bold text-emerald-900">{data.totalLiberados.toLocaleString('pt-BR')}</div>
+            <p className="text-sm text-emerald-700">Contatos no período</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Seção Valores por Cidade Clean */}
+      {/* Seção Custo por Cidade com cores */}
       {cityData && cityData.length > 0 && (
         <div className="flex-shrink-0 space-y-3">
           <div className="flex items-center justify-center space-x-3">
-            <div className="h-px bg-gray-200 flex-1"></div>
-            <div className="flex items-center space-x-2 bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">
-              <div className="p-1.5 rounded-lg bg-orange-100">
-                <MapPin className="h-4 w-4 text-orange-600" />
+            <div className="h-px bg-gradient-to-r from-transparent via-orange-300 to-transparent flex-1"></div>
+            <div className="flex items-center space-x-2 bg-gradient-to-r from-orange-50 to-amber-50 px-4 py-2 rounded-lg border border-orange-200 shadow-sm">
+              <div className="p-1.5 rounded-lg bg-orange-500 shadow-md">
+                <MapPin className="h-4 w-4 text-white" />
               </div>
-              <h2 className="text-sm font-semibold text-gray-700">
-                Valores por Cidade
+              <h2 className="text-sm font-semibold text-orange-800">
+                Custo por Cidade
               </h2>
             </div>
-            <div className="h-px bg-gray-200 flex-1"></div>
+            <div className="h-px bg-gradient-to-r from-transparent via-orange-300 to-transparent flex-1"></div>
           </div>
           <div className="grid grid-cols-6 gap-3">
             {cityData.map((city) => (
-              <Card key={city.id} className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <Card key={city.id} className="bg-gradient-to-br from-orange-50 to-amber-100 border border-orange-200 shadow-md hover:shadow-lg transition-all duration-200">
                 <CardHeader className="flex flex-col items-center space-y-1 p-3 pb-2">
-                  <div className="p-1.5 rounded-lg bg-orange-100">
-                    <MapPin className="h-3 w-3 text-orange-600" />
+                  <div className="p-1.5 rounded-lg bg-orange-500 shadow-md">
+                    <MapPin className="h-3 w-3 text-white" />
                   </div>
-                  <CardTitle className="text-xs font-semibold text-gray-800 text-center leading-tight">{city.name}</CardTitle>
+                  <CardTitle className="text-xs font-semibold text-orange-900 text-center leading-tight">{city.name}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 pt-0 text-center">
                   <div className="flex items-baseline justify-center space-x-1">
-                    <span className="text-xs font-medium text-gray-600">R$</span>
-                    <span className="text-lg font-bold text-gray-900">
+                    <span className="text-xs font-medium text-orange-700">R$</span>
+                    <span className="text-lg font-bold text-orange-900">
                       {city.value}
                     </span>
                   </div>
@@ -114,32 +114,34 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Performance por Responsável Clean */}
+      {/* Performance por Responsável com cores */}
       <div className="flex-shrink-0 space-y-3">
         <div className="flex items-center space-x-2">
-          <div className="p-1.5 rounded-lg bg-slate-100"><Award className="h-4 w-4 text-slate-700" /></div>
-          <h2 className="text-sm font-semibold text-gray-700">Performance por Responsável</h2>
+          <div className="p-1.5 rounded-lg bg-purple-500 shadow-md"><Award className="h-4 w-4 text-white" /></div>
+          <h2 className="text-sm font-semibold text-purple-800">Performance por Responsável</h2>
         </div>
         <div className="grid grid-cols-5 gap-3">
           {responsaveis.map((responsavel, index) => {
             const dados = data.responsaveis[responsavel] || { enviados: 0, liberados: 0 };
-            const colors = ['bg-blue-100 text-blue-700','bg-purple-100 text-purple-700','bg-green-100 text-green-700','bg-orange-100 text-orange-700','bg-pink-100 text-pink-700'];
+            const cardColors = ['from-blue-50 to-blue-100 border-blue-200','from-purple-50 to-purple-100 border-purple-200','from-green-50 to-green-100 border-green-200','from-orange-50 to-orange-100 border-orange-200','from-pink-50 to-pink-100 border-pink-200'];
+            const avatarColors = ['bg-blue-500','bg-purple-500','bg-green-500','bg-orange-500','bg-pink-500'];
+            const textColors = ['text-blue-800','text-purple-800','text-green-800','text-orange-800','text-pink-800'];
             return (
-              <Card key={responsavel} className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <Card key={responsavel} className={`bg-gradient-to-br ${cardColors[index % cardColors.length]} shadow-md hover:shadow-lg transition-all duration-200`}>
                 <CardHeader className="flex flex-col items-center space-y-1 p-3">
-                  <div className={`w-8 h-8 rounded-lg ${colors[index % colors.length]} flex items-center justify-center`}>
-                    <span className="font-bold text-xs">{responsavel.split(' ').map(n => n[0]).join('').substring(0, 2)}</span>
+                  <div className={`w-8 h-8 rounded-lg ${avatarColors[index % avatarColors.length]} shadow-md flex items-center justify-center`}>
+                    <span className="font-bold text-xs text-white">{responsavel.split(' ').map(n => n[0]).join('').substring(0, 2)}</span>
                   </div>
-                  <CardTitle className="text-xs font-semibold text-gray-800 text-center">{responsavel}</CardTitle>
+                  <CardTitle className={`text-xs font-semibold ${textColors[index % textColors.length]} text-center`}>{responsavel}</CardTitle>
                 </CardHeader>
                 <CardContent className="px-3 pb-3 space-y-2">
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-gray-50">
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-white/70 backdrop-blur-sm">
                     <span className="text-xs text-gray-600 font-medium">Enviados</span>
-                    <span className="text-sm font-bold text-gray-900">{dados.enviados.toLocaleString('pt-BR')}</span>
+                    <span className={`text-sm font-bold ${textColors[index % textColors.length]}`}>{dados.enviados.toLocaleString('pt-BR')}</span>
                   </div>
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-gray-50">
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-white/70 backdrop-blur-sm">
                     <span className="text-xs text-gray-600 font-medium">Liberados</span>
-                    <span className="text-sm font-bold text-gray-900">{dados.liberados.toLocaleString('pt-BR')}</span>
+                    <span className={`text-sm font-bold ${textColors[index % textColors.length]}`}>{dados.liberados.toLocaleString('pt-BR')}</span>
                   </div>
                 </CardContent>
               </Card>
