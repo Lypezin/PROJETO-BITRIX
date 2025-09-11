@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { useDashboard } from '../hooks/useDashboard';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Users, CheckCircle, Clock, TrendingUp, Award, Star } from 'lucide-react';
+import { Users, CheckCircle, Clock, TrendingUp, Award } from 'lucide-react';
 
 export default function Dashboard() {
   const { data, filters, isLoading } = useDashboard();
@@ -129,7 +129,6 @@ export default function Dashboard() {
         <div className="grid grid-cols-5 gap-3">
           {responsaveis.map((responsavel, index) => {
             const dados = data.responsaveis[responsavel] || { enviados: 0, liberados: 0 };
-            const total = dados.enviados + dados.liberados;
             
             const gradientColors = [
               'from-rose-400 to-pink-600',
