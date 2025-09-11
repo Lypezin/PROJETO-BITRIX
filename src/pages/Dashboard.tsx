@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { useDashboard } from '../hooks/useDashboard';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Users, CheckCircle, Clock, TrendingUp, Award, MapPin, DollarSign } from 'lucide-react';
+import { Users, CheckCircle, Clock, TrendingUp, Award, MapPin } from 'lucide-react';
 
 export default function Dashboard() {
   const { data, filters, isLoading, cityData } = useDashboard();
