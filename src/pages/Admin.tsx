@@ -5,13 +5,10 @@ import { useDashboard } from '../hooks/useDashboard';
 import { format, startOfDay, endOfDay } from 'date-fns';
 import { Filter, RefreshCw, Settings2, Calendar, Zap, Sparkles, PlusCircle, Trash2, Map } from 'lucide-react';
 
-const formatDate = (date: Date) => format(date, "dd/MM/yyyy");
-
 export default function Admin() {
   const { 
     filters, 
     setFilters, 
-    isLoading, 
     cityData, 
     addCity, 
     removeCity 
