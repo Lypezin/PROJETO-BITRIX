@@ -62,7 +62,10 @@ class BitrixApiService {
         return "Erro Cidades";
       }
     }
-    return this.cityFieldCache[cityId] || cityId;
+    if (this.cityFieldCache && this.cityFieldCache[cityId]) {
+      return this.cityFieldCache[cityId];
+    }
+    return cityId;
   }
 
   async getDashboardMetrics(
