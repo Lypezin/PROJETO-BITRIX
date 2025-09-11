@@ -136,26 +136,6 @@ class BitrixApiService {
     return allContacts;
   }
 
-  async getContactsForExport(
-    startDate: Date,
-    endDate: Date
-  ): Promise<ContactData[]> {
-    const filter = {
-      [`>=${CUSTOM_FIELDS.DATA_ENVIO}`]: formatDateTimeForBitrix(startDate),
-      [`<=${CUSTOM_FIELDS.DATA_ENVIO}`]: formatDateTimeForBitrix(endDate),
-    };
-    
-    const select = [
-      'ID',
-      'NAME',
-      'ASSIGNED_BY_ID',
-      CUSTOM_FIELDS.DATA_ENVIO,
-      CUSTOM_FIELDS.DATA_LIBERACAO,
-    ];
-
-    return this.fetchContactsByFilter(filter, select);
-  }
-
   private async callBitrixMethod(method: string, params: any = {}) {
     try {
       const response = await axios.post(this.baseUrl, {

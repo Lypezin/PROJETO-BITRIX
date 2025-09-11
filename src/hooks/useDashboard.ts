@@ -121,30 +121,6 @@ export const useDashboard = () => {
     updateLastUpdate
   ]);
 
-  const exportData = useCallback(async () => {
-    try {
-      setLoading(true);
-      
-      const contacts = await bitrixApi.getContactsForExport(
-        filters.dataEnvioStart, 
-        filters.dataEnvioEnd
-      );
-
-      const XLSX = await import('xlsx');
-      const worksheet = XLSX.utils.json_to_sheet(contacts);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Contatos');
-      
-      const fileName = `contatos_${filters.dataEnvioStart.toISOString().split('T')[0]}_a_${filters.dataEnvioEnd.toISOString().split('T')[0]}.xlsx`;
-      
-      XLSX.writeFile(workbook, fileName);
-    } catch (error) {
-      console.error('Erro ao exportar dados:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters.dataEnvioStart, filters.dataEnvioEnd, setLoading]);
-
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -165,7 +141,6 @@ export const useDashboard = () => {
     cityData,
     setFilters,
     fetchData,
-    exportData,
     addCity,
     removeCity,
   };

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { useDashboard } from '../hooks/useDashboard';
 import { format, startOfDay, endOfDay } from 'date-fns';
-import { Download, Filter, RefreshCw, Settings2, Calendar, FileSpreadsheet, Zap, Sparkles, PlusCircle, Trash2, Map } from 'lucide-react';
+import { Filter, RefreshCw, Settings2, Calendar, Zap, Sparkles, PlusCircle, Trash2, Map } from 'lucide-react';
 
 const formatDate = (date: Date) => format(date, "dd/MM/yyyy");
 
@@ -11,7 +11,6 @@ export default function Admin() {
   const { 
     filters, 
     setFilters, 
-    exportData, 
     isLoading, 
     cityData, 
     addCity, 
@@ -36,10 +35,6 @@ export default function Admin() {
       dataLiberacaoStart: startOfDay(dataLiberacaoRange.start),
       dataLiberacaoEnd: endOfDay(dataLiberacaoRange.end),
     });
-  };
-
-  const handleExport = () => {
-    exportData();
   };
 
   const handleAddCity = () => {
@@ -205,66 +200,7 @@ export default function Admin() {
           </Card>
         </div>
 
-        {/* Exportação de Dados */}
         <div className="space-y-6">
-          <Card className="bg-gradient-to-br from-emerald-50 to-green-100 border border-emerald-200 shadow-md">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-emerald-600 shadow-lg">
-                  <FileSpreadsheet className="h-5 w-5 text-white" />
-                </div>
-                <span className="font-semibold text-emerald-900">Exportação de Dados</span>
-              </CardTitle>
-              <p className="text-emerald-700 text-sm">Baixe relatórios completos em Excel</p>
-            </CardHeader>
-            
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                    <span className="text-sm font-medium text-gray-700">Período de Envio</span>
-                  </div>
-                  <p className="text-gray-900 font-semibold">
-                    {formatDate(filters.dataEnvioStart)} - {formatDate(filters.dataEnvioEnd)}
-                  </p>
-                </div>
-                
-                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span className="text-sm font-medium text-gray-700">Período de Liberação</span>
-                  </div>
-                  <p className="text-gray-900 font-semibold">
-                    {formatDate(filters.dataLiberacaoStart)} - {formatDate(filters.dataLiberacaoEnd)}
-                  </p>
-                </div>
-              </div>
-
-              <Button
-                onClick={handleExport}
-                disabled={isLoading}
-                className={`w-full bg-emerald-600 hover:bg-emerald-700 text-white transition-colors duration-200 py-2.5 px-4 rounded-lg font-medium ${
-                  isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <div className="flex items-center justify-center space-x-2">
-                  <Download className={`h-4 w-4 ${isLoading ? 'animate-bounce' : ''}`} />
-                  <span>{isLoading ? 'Processando Exportação...' : 'Exportar para Excel'}</span>
-                </div>
-              </Button>
-
-              <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
-                <div className="flex items-center space-x-2">
-                  <Sparkles className="h-4 w-4 text-yellow-600" />
-                  <span className="text-xs text-yellow-800 font-medium">
-                    Exportação baseada no período de <strong>Data de Envio</strong>
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Gerenciador de Custos por Cidade */}
           <Card className="bg-gradient-to-br from-orange-50 to-amber-100 border border-orange-200 shadow-md">
             <CardHeader>
