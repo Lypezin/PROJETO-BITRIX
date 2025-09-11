@@ -29,41 +29,46 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header compacto para TV */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-4 text-white shadow-xl">
+      {/* Header Premium para TV */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 p-6 text-white shadow-2xl">
         <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-white/10 blur-3xl"></div>
+        <div className="absolute -bottom-6 -left-6 h-40 w-40 rounded-full bg-white/10 blur-3xl"></div>
         
         <div className="relative z-10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-xl bg-white/20">
-                <TrendingUp className="h-6 w-6" />
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <div className="absolute inset-0 rounded-2xl bg-white/30 blur-lg"></div>
+                <div className="relative p-3 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30">
+                  <TrendingUp className="h-8 w-8" />
+                </div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">
+                <h1 className="text-3xl font-black bg-gradient-to-r from-white via-purple-100 to-pink-100 bg-clip-text text-transparent">
                   Dashboard de Performance
                 </h1>
-                <p className="text-blue-100 text-sm">Análise dos dados Bitrix24</p>
+                <p className="text-purple-100 text-lg font-medium mt-1">Análise Completa dos Dados Bitrix24</p>
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 text-center">
-                <div className="flex items-center justify-center space-x-1 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-blue-300"></div>
-                  <span className="text-xs font-medium text-blue-100">Envio</span>
+              <div className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/20 text-center shadow-lg">
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-300 shadow-lg"></div>
+                  <span className="text-sm font-bold text-blue-100">Período de Envio</span>
                 </div>
-                <p className="text-white font-semibold text-sm">
+                <p className="text-white font-black text-base">
                   {formatDate(filters.dataEnvioStart)} - {formatDate(filters.dataEnvioEnd)}
                 </p>
               </div>
               
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 text-center">
-                <div className="flex items-center justify-center space-x-1 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-green-300"></div>
-                  <span className="text-xs font-medium text-green-100">Liberação</span>
+              <div className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/20 text-center shadow-lg">
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <div className="w-3 h-3 rounded-full bg-emerald-300 shadow-lg"></div>
+                  <span className="text-sm font-bold text-emerald-100">Período de Liberação</span>
                 </div>
-                <p className="text-white font-semibold text-sm">
+                <p className="text-white font-black text-base">
                   {formatDate(filters.dataLiberacaoStart)} - {formatDate(filters.dataLiberacaoEnd)}
                 </p>
               </div>
@@ -72,121 +77,131 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Cards Principais - Otimizado para TV */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 text-white shadow-xl">
-          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+      {/* Cards Principais Premium para TV */}
+      <div className="grid grid-cols-2 gap-6">
+        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-800 text-white shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/15 to-transparent"></div>
+          <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/10 blur-2xl"></div>
+          <div className="absolute -bottom-4 -left-4 h-24 w-24 rounded-full bg-white/10 blur-xl"></div>
           
-          <CardHeader className="relative z-10 flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-bold uppercase tracking-wider text-blue-100">
+          <CardHeader className="relative z-10 flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-base font-black uppercase tracking-wide text-cyan-100">
               Total de Enviados
             </CardTitle>
-            <div className="p-2 rounded-xl bg-white/20">
-              <Users className="h-5 w-5 text-white" />
+            <div className="relative">
+              <div className="absolute inset-0 rounded-2xl bg-white/30 blur-lg"></div>
+              <div className="relative p-3 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30">
+                <Users className="h-6 w-6 text-white" />
+              </div>
             </div>
           </CardHeader>
           <CardContent className="relative z-10">
-            <div className="text-4xl font-black mb-1 text-white">
+            <div className="text-5xl font-black mb-2 bg-gradient-to-r from-white to-cyan-100 bg-clip-text text-transparent">
               {data.totalEnviados.toLocaleString('pt-BR')}
             </div>
-            <p className="text-xs text-blue-100 font-medium">
-              Contatos enviados no período
+            <p className="text-sm text-cyan-100 font-semibold">
+              Contatos enviados no período selecionado
             </p>
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-emerald-500 via-green-600 to-teal-700 text-white shadow-xl">
-          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-emerald-500 via-green-600 to-teal-800 text-white shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/15 to-transparent"></div>
+          <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/10 blur-2xl"></div>
+          <div className="absolute -bottom-4 -left-4 h-24 w-24 rounded-full bg-white/10 blur-xl"></div>
           
-          <CardHeader className="relative z-10 flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-bold uppercase tracking-wider text-emerald-100">
+          <CardHeader className="relative z-10 flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-base font-black uppercase tracking-wide text-emerald-100">
               Total de Liberados
             </CardTitle>
-            <div className="p-2 rounded-xl bg-white/20">
-              <CheckCircle className="h-5 w-5 text-white" />
+            <div className="relative">
+              <div className="absolute inset-0 rounded-2xl bg-white/30 blur-lg"></div>
+              <div className="relative p-3 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30">
+                <CheckCircle className="h-6 w-6 text-white" />
+              </div>
             </div>
           </CardHeader>
           <CardContent className="relative z-10">
-            <div className="text-4xl font-black mb-1 text-white">
+            <div className="text-5xl font-black mb-2 bg-gradient-to-r from-white to-emerald-100 bg-clip-text text-transparent">
               {data.totalLiberados.toLocaleString('pt-BR')}
             </div>
-            <p className="text-xs text-emerald-100 font-medium">
-              Contatos liberados no período
+            <p className="text-sm text-emerald-100 font-semibold">
+              Contatos liberados no período selecionado
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Cards dos Responsáveis - Otimizado para TV */}
-      <div className="space-y-3">
-        <div className="flex items-center space-x-2">
-          <div className="p-1.5 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500">
-            <Award className="h-4 w-4 text-white" />
+      {/* Cards dos Responsáveis Premium para TV */}
+      <div className="space-y-4">
+        <div className="flex items-center space-x-3">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 blur-lg opacity-50"></div>
+            <div className="relative p-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg">
+              <Award className="h-5 w-5 text-white" />
+            </div>
           </div>
-          <h2 className="text-lg font-bold text-gray-800">Performance por Responsável</h2>
+          <h2 className="text-xl font-black bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+            Performance por Responsável
+          </h2>
         </div>
         
-        <div className="grid grid-cols-5 gap-3">
+        <div className="grid grid-cols-5 gap-4">
           {responsaveis.map((responsavel, index) => {
             const dados = data.responsaveis[responsavel] || { enviados: 0, liberados: 0 };
             
             const gradientColors = [
-              'from-rose-400 to-pink-600',
-              'from-violet-400 to-purple-600', 
-              'from-blue-400 to-indigo-600',
-              'from-emerald-400 to-teal-600',
-              'from-amber-400 to-orange-600'
+              'from-rose-500 to-pink-700',
+              'from-violet-500 to-purple-700', 
+              'from-blue-500 to-indigo-700',
+              'from-emerald-500 to-teal-700',
+              'from-amber-500 to-orange-700'
             ];
             
             return (
-              <Card key={responsavel} className="relative overflow-hidden border-0 bg-white shadow-lg">
-                <div className={`absolute inset-0 bg-gradient-to-br ${gradientColors[index % gradientColors.length]} opacity-5`}></div>
+              <Card key={responsavel} className="relative overflow-hidden border-0 bg-white shadow-xl">
+                <div className={`absolute inset-0 bg-gradient-to-br ${gradientColors[index % gradientColors.length]} opacity-8`}></div>
+                <div className="absolute -top-4 -right-4 h-16 w-16 rounded-full bg-white/10 blur-xl"></div>
                 
-                <CardHeader className="relative z-10 pb-2">
-                  <div className="flex flex-col items-center space-y-2">
-                    <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${gradientColors[index % gradientColors.length]} flex items-center justify-center shadow-md`}>
-                      <span className="text-white font-bold text-sm">
-                        {responsavel.split(' ').map(n => n[0]).join('').substring(0, 2)}
-                      </span>
+                <CardHeader className="relative z-10 pb-3">
+                  <div className="flex flex-col items-center space-y-3">
+                    <div className="relative">
+                      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${gradientColors[index % gradientColors.length]} blur-lg opacity-50`}></div>
+                      <div className={`relative w-10 h-10 rounded-2xl bg-gradient-to-br ${gradientColors[index % gradientColors.length]} flex items-center justify-center shadow-lg border-2 border-white/20`}>
+                        <span className="text-white font-black text-sm">
+                          {responsavel.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                        </span>
+                      </div>
                     </div>
-                    <CardTitle className="text-xs font-bold text-gray-800 text-center leading-tight">
+                    <CardTitle className="text-sm font-bold text-gray-800 text-center leading-tight">
                       {responsavel}
                     </CardTitle>
                   </div>
                 </CardHeader>
                 
-                <CardContent className="relative z-10 space-y-2 px-3 pb-3">
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-blue-50">
-                    <div className="flex items-center space-x-1">
-                      <Clock className="h-3 w-3 text-blue-500" />
-                      <span className="text-xs text-blue-700 font-semibold">Env</span>
+                <CardContent className="relative z-10 space-y-3 px-4 pb-4">
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100">
+                    <div className="flex items-center space-x-2">
+                      <div className="p-1 rounded-lg bg-blue-500 shadow-md">
+                        <Clock className="h-3 w-3 text-white" />
+                      </div>
+                      <span className="text-xs text-blue-700 font-bold">Enviados</span>
                     </div>
-                    <span className="text-lg font-black text-blue-600">
+                    <span className="text-xl font-black text-blue-700">
                       {dados.enviados.toLocaleString('pt-BR')}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-emerald-50">
-                    <div className="flex items-center space-x-1">
-                      <CheckCircle className="h-3 w-3 text-emerald-500" />
-                      <span className="text-xs text-emerald-700 font-semibold">Lib</span>
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100">
+                    <div className="flex items-center space-x-2">
+                      <div className="p-1 rounded-lg bg-emerald-500 shadow-md">
+                        <CheckCircle className="h-3 w-3 text-white" />
+                      </div>
+                      <span className="text-xs text-emerald-700 font-bold">Liberados</span>
                     </div>
-                    <span className="text-lg font-black text-emerald-600">
+                    <span className="text-xl font-black text-emerald-700">
                       {dados.liberados.toLocaleString('pt-BR')}
                     </span>
-                  </div>
-                  
-                  <div className="pt-1">
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
-                      <span>Taxa</span>
-                      <span>{dados.enviados > 0 ? Math.round((dados.liberados / dados.enviados) * 100) : 0}%</span>
-                    </div>
-                    <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full bg-gradient-to-r ${gradientColors[index % gradientColors.length]}`}
-                        style={{ width: dados.enviados > 0 ? `${Math.min((dados.liberados / dados.enviados) * 100, 100)}%` : '0%' }}
-                      ></div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
