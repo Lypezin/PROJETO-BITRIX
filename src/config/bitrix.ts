@@ -34,4 +34,5 @@ export const CUSTOM_FIELDS = {
 export const STATUS_VALUES = {
   ENVIADO: ['A Enviar 1.0', 'A Enviar 2.0'],
   LIBERADO: ['Liberado', 'Aberto'],
+  EXCLUIR_ENVIO: ['Confirmar', 'Cancelado', 'Abrindo MEI'],
 };
