@@ -128,20 +128,17 @@ export default function Dashboard() {
             const textColors = ['text-blue-800','text-purple-800','text-green-800','text-orange-800','text-pink-800'];
             return (
               <Card key={responsavel} className={`bg-gradient-to-br ${cardColors[index % cardColors.length]} shadow-md hover:shadow-lg transition-all duration-200`}>
-                <CardHeader className="flex flex-col items-center space-y-2 p-4">
-                  <div className={`w-12 h-12 rounded-full ${avatarColors[index % avatarColors.length]} shadow-lg flex items-center justify-center ring-2 ring-white`}>
-                    <span className="font-bold text-sm text-white">{responsavel.split(' ').map(n => n[0]).join('').substring(0, 2)}</span>
-                  </div>
-                  <CardTitle className={`text-sm font-bold ${textColors[index % textColors.length]} text-center leading-tight`}>{responsavel}</CardTitle>
+                <CardHeader className="flex flex-col items-center space-y-1 p-3">
+                  <CardTitle className={`text-base font-bold ${textColors[index % textColors.length]} text-center`}>{responsavel}</CardTitle>
                 </CardHeader>
-                <CardContent className="px-4 pb-4 space-y-2">
-                  <div className="flex items-center justify-between p-2.5 rounded-lg bg-white/70 backdrop-blur-sm">
+                <CardContent className="px-3 pb-3 space-y-2">
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-white/70 backdrop-blur-sm">
                     <span className="text-xs text-gray-600 font-medium">Enviados</span>
-                    <span className={`text-base font-bold ${textColors[index % textColors.length]}`}>{dados.enviados.toLocaleString('pt-BR')}</span>
+                    <span className={`text-sm font-bold ${textColors[index % textColors.length]}`}>{dados.enviados.toLocaleString('pt-BR')}</span>
                   </div>
-                  <div className="flex items-center justify-between p-2.5 rounded-lg bg-white/70 backdrop-blur-sm">
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-white/70 backdrop-blur-sm">
                     <span className="text-xs text-gray-600 font-medium">Liberados</span>
-                    <span className={`text-base font-bold ${textColors[index % textColors.length]}`}>{dados.liberados.toLocaleString('pt-BR')}</span>
+                    <span className={`text-sm font-bold ${textColors[index % textColors.length]}`}>{dados.liberados.toLocaleString('pt-BR')}</span>
                   </div>
                 </CardContent>
               </Card>
