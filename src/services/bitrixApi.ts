@@ -1,6 +1,7 @@
 // src/services/bitrixApi.ts
 import axios from 'axios';
 import { RESPONSIBLE_USERS, CUSTOM_FIELDS } from '../config/bitrix';
+import { startOfDay } from 'date-fns';
 
 const RATE_LIMIT_MS = 500; // 2 chamadas por segundo
 let lastApiCall = 0;
@@ -62,7 +63,7 @@ class BitrixApiService {
         const envioDateStr = contact[CUSTOM_FIELDS.DATA_ENVIO];
         if (envioDateStr) {
           const datePart = envioDateStr.split('T')[0];
-          const envioDate = new Date(datePart.replace(/-/g, '/'));
+          const envioDate = startOfDay(new Date(datePart.replace(/-/g, '/')));
           
           if (envioDate >= dataEnvioStart && envioDate <= dataEnvioEnd) {
             metrics.totalEnviados++;
@@ -77,7 +78,7 @@ class BitrixApiService {
         const liberacaoDateStr = contact[CUSTOM_FIELDS.DATA_LIBERACAO];
         if (liberacaoDateStr) {
           const datePart = liberacaoDateStr.split('T')[0];
-          const liberacaoDate = new Date(datePart.replace(/-/g, '/'));
+          const liberacaoDate = startOfDay(new Date(datePart.replace(/-/g, '/')));
 
           if (liberacaoDate >= dataLiberacaoStart && liberacaoDate <= dataLiberacaoEnd) {
             metrics.totalLiberados++;
@@ -148,7 +149,7 @@ class BitrixApiService {
       if (!envioDateStr) return false;
 
       const datePart = envioDateStr.split('T')[0];
-      const envioDate = new Date(datePart.replace(/-/g, '/'));
+      const envioDate = startOfDay(new Date(datePart.replace(/-/g, '/')));
       
       return envioDate >= startDate && envioDate <= endDate;
     });
