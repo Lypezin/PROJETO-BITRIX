@@ -22,15 +22,15 @@ export default function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-gray-50">
       {/* Header Clean */}
       <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-full mx-auto px-6">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-3">
+        <div className="max-w-full mx-auto px-4">
+          <div className="flex justify-between items-center h-14">
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
                 <div className="p-2 rounded-lg bg-slate-900">
-                  <BarChart3 className="h-6 w-6 text-white" />
+                  <BarChart3 className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">
+                  <h1 className="text-lg font-bold text-gray-900">
                     Dashboard EntreGÔ
                   </h1>
                   <p className="text-xs text-gray-500">Bitrix24 Analytics</p>
@@ -92,7 +92,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Main Content condicional para TV */}
       <main className={isDashboard 
-        ? "max-w-full mx-auto h-[calc(100vh-80px)] overflow-hidden" 
+        ? "max-w-full mx-auto h-[calc(100vh-60px)] overflow-hidden" 
         : "max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8"
       }>
         {children}
