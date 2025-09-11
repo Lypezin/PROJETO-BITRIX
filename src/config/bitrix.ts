@@ -28,6 +28,7 @@ export const CUSTOM_FIELDS = {
   DATA_ENVIO: 'UF_CRM_1659459001630', // Data de Envio
   DATA_LIBERACAO: 'UF_CRM_1669498023605', // Data de Liberação*
   STATUS: 'UF_CRM_1659459407558', // Status
+  CIDADE: 'UF_CRM_1660064582829', // Cidade/Região
 };
 
 // Status possíveis para contagem

@@ -122,22 +122,46 @@ export default function Dashboard() {
         </div>
         <div className="grid grid-cols-5 gap-3">
           {responsaveis.map((responsavel, index) => {
-            const dados = data.responsaveis[responsavel] || { enviados: 0, liberados: 0 };
+            const dados = data.responsaveis[responsavel] || { totalEnviados: 0, totalLiberados: 0, enviadosPorCidade: {}, liberadosPorCidade: {} };
             const cardColors = ['from-blue-50 to-blue-100 border-blue-200','from-purple-50 to-purple-100 border-purple-200','from-green-50 to-green-100 border-green-200','from-orange-50 to-orange-100 border-orange-200','from-pink-50 to-pink-100 border-pink-200'];
             const textColors = ['text-blue-800','text-purple-800','text-green-800','text-orange-800','text-pink-800'];
             return (
-              <Card key={responsavel} className={`bg-gradient-to-br ${cardColors[index % cardColors.length]} shadow-md hover:shadow-lg transition-all duration-200`}>
+              <Card key={responsavel} className={`flex flex-col bg-gradient-to-br ${cardColors[index % cardColors.length]} shadow-md hover:shadow-lg transition-all duration-200`}>
                 <CardHeader className="flex flex-col items-center space-y-1 p-3">
                   <CardTitle className={`text-base font-bold ${textColors[index % textColors.length]} text-center`}>{responsavel}</CardTitle>
                 </CardHeader>
-                <CardContent className="px-3 pb-3 space-y-2">
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-white/70 backdrop-blur-sm">
-                    <span className="text-xs text-gray-600 font-medium">Enviados</span>
-                    <span className={`text-sm font-bold ${textColors[index % textColors.length]}`}>{dados.enviados.toLocaleString('pt-BR')}</span>
+                <CardContent className="flex-grow px-3 pb-3 space-y-2">
+                  {/* Enviados Detalhado */}
+                  <div className="flex-1 bg-white/70 backdrop-blur-sm rounded-lg p-2 space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600 font-medium">Enviados</span>
+                      <span className={`text-sm font-bold ${textColors[index % textColors.length]}`}>{dados.totalEnviados}</span>
+                    </div>
+                    <div className="border-t border-gray-200/50 my-1"></div>
+                    <div className="space-y-0.5 text-[11px] font-medium text-gray-700">
+                      {Object.entries(dados.enviadosPorCidade).map(([cidade, count]) => (
+                        <div key={cidade} className="flex justify-between items-center">
+                          <span className="truncate max-w-[80px]">{cidade}</span>
+                          <span className={`font-semibold ${textColors[index % textColors.length]}`}>{count}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-white/70 backdrop-blur-sm">
-                    <span className="text-xs text-gray-600 font-medium">Liberados</span>
-                    <span className={`text-sm font-bold ${textColors[index % textColors.length]}`}>{dados.liberados.toLocaleString('pt-BR')}</span>
+                  {/* Liberados Detalhado */}
+                  <div className="flex-1 bg-white/70 backdrop-blur-sm rounded-lg p-2 space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600 font-medium">Liberados</span>
+                      <span className={`text-sm font-bold ${textColors[index % textColors.length]}`}>{dados.totalLiberados}</span>
+                    </div>
+                    <div className="border-t border-gray-200/50 my-1"></div>
+                    <div className="space-y-0.5 text-[11px] font-medium text-gray-700">
+                      {Object.entries(dados.liberadosPorCidade).map(([cidade, count]) => (
+                        <div key={cidade} className="flex justify-between items-center">
+                          <span className="truncate max-w-[80px]">{cidade}</span>
+                          <span className={`font-semibold ${textColors[index % textColors.length]}`}>{count}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

@@ -27,8 +27,10 @@ export interface DashboardMetrics {
   totalLiberados: number;
   responsaveis: {
     [key: string]: {
-      enviados: number;
-      liberados: number;
+      totalEnviados: number;
+      totalLiberados: number;
+      enviadosPorCidade: { [cidade: string]: number };
+      liberadosPorCidade: { [cidade: string]: number };
     };
   };
 }
@@ -60,7 +62,7 @@ class BitrixApiService {
         [`<=${CUSTOM_FIELDS.DATA_LIBERACAO}`]: formatDateTimeForBitrix(dataLiberacaoEnd),
       };
 
-      const selectFields = ['ID', 'ASSIGNED_BY_ID'];
+      const selectFields = ['ID', 'ASSIGNED_BY_ID', CUSTOM_FIELDS.CIDADE];
 
       console.log('🔄 Iniciando busca de contatos ENVIADOS...');
       const enviadosContacts = await this.fetchContactsByFilter(enviadosFilter, selectFields);
@@ -76,7 +78,12 @@ class BitrixApiService {
         responsaveis: {}
       };
       for (const name of Object.keys(RESPONSIBLE_USERS)) {
-        metrics.responsaveis[name] = { enviados: 0, liberados: 0 };
+        metrics.responsaveis[name] = { 
+          totalEnviados: 0, 
+          totalLiberados: 0,
+          enviadosPorCidade: {},
+          liberadosPorCidade: {},
+        };
       }
       const responsibleUserIds = Object.entries(RESPONSIBLE_USERS).reduce((acc, [name, id]) => {
         acc[id.toString()] = name;
@@ -86,14 +93,20 @@ class BitrixApiService {
       for (const contact of enviadosContacts) {
         const responsibleName = responsibleUserIds[contact.ASSIGNED_BY_ID];
         if (responsibleName && metrics.responsaveis[responsibleName]) {
-          metrics.responsaveis[responsibleName].enviados++;
+          metrics.responsaveis[responsibleName].totalEnviados++;
+          const cidade = contact[CUSTOM_FIELDS.CIDADE] || 'Não especificado';
+          metrics.responsaveis[responsibleName].enviadosPorCidade[cidade] = 
+            (metrics.responsaveis[responsibleName].enviadosPorCidade[cidade] || 0) + 1;
         }
       }
 
       for (const contact of liberadosContacts) {
         const responsibleName = responsibleUserIds[contact.ASSIGNED_BY_ID];
         if (responsibleName && metrics.responsaveis[responsibleName]) {
-          metrics.responsaveis[responsibleName].liberados++;
+          metrics.responsaveis[responsibleName].totalLiberados++;
+          const cidade = contact[CUSTOM_FIELDS.CIDADE] || 'Não especificado';
+          metrics.responsaveis[responsibleName].liberadosPorCidade[cidade] = 
+            (metrics.responsaveis[responsibleName].liberadosPorCidade[cidade] || 0) + 1;
         }
       }
       
