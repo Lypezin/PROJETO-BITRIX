@@ -146,7 +146,7 @@ export default function Dashboard() {
               Valores por Cidade
             </h2>
           </div>
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-6 gap-3">
             {cityData.map((city) => (
               <Card key={city.id} className="relative overflow-hidden border-0 bg-white shadow-xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-600 opacity-8"></div>
@@ -160,9 +160,9 @@ export default function Dashboard() {
                   </div>
                   <CardTitle className="text-sm font-bold text-gray-800">{city.name}</CardTitle>
                 </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="flex items-center space-x-2">
-                    <DollarSign className="h-5 w-5 text-amber-700" />
+                <CardContent className="relative z-10 pt-0">
+                  <div className="flex items-baseline space-x-1">
+                    <span className="text-base font-bold text-amber-800">R$</span>
                     <span className="text-2xl font-black text-amber-800">{city.value}</span>
                   </div>
                 </CardContent>
