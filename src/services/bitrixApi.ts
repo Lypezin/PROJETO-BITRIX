@@ -63,8 +63,8 @@ class BitrixApiService {
         const envioDateStr = contact[CUSTOM_FIELDS.DATA_ENVIO];
         const status = contact[CUSTOM_FIELDS.STATUS];
 
-        // Lógica de exclusão: conta se o status não estiver na lista de exclusão
-        if (envioDateStr && status && !STATUS_VALUES.EXCLUIR_ENVIO.includes(status.trim())) {
+        // Lógica de exclusão: conta se o status não estiver na lista de exclusão ou se estiver vazio
+        if (envioDateStr && (!status || !STATUS_VALUES.EXCLUIR_ENVIO.includes(status.trim()))) {
           const datePart = envioDateStr.split('T')[0];
           const envioDate = startOfDay(new Date(datePart.replace(/-/g, '/')));
           
