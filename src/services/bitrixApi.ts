@@ -1,10 +1,20 @@
 // src/services/bitrixApi.ts
 import axios from 'axios';
 import { RESPONSIBLE_USERS, CUSTOM_FIELDS, STATUS_VALUES } from '../config/bitrix';
-import { startOfDay } from 'date-fns';
 
-const RATE_LIMIT_MS = 500; // 2 chamadas por segundo
+const RATE_LIMIT_MS = 500;
 let lastApiCall = 0;
+
+const formatDateTimeForBitrix = (date: Date): string => {
+  const pad = (num: number) => num.toString().padStart(2, '0');
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const seconds = pad(date.getSeconds());
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
 
 export interface ContactData {
   ID: string;
@@ -40,61 +50,54 @@ class BitrixApiService {
 
     this.isFetchingMetrics = true;
     try {
-      console.log('🔄 Iniciando busca OTIMIZADA de contatos para filtragem manual...');
-      const allContacts = await this.fetchAllContactsWithPagination();
-      console.log(`✅ ${allContacts.length} contatos relevantes encontrados. Iniciando filtragem...`);
+      const enviadosFilter = {
+        [`>=${CUSTOM_FIELDS.DATA_ENVIO}`]: formatDateTimeForBitrix(dataEnvioStart),
+        [`<=${CUSTOM_FIELDS.DATA_ENVIO}`]: formatDateTimeForBitrix(dataEnvioEnd),
+        [`!=${CUSTOM_FIELDS.STATUS}`]: STATUS_VALUES.EXCLUIR_ENVIO,
+      };
+      const liberadosFilter = {
+        [`>=${CUSTOM_FIELDS.DATA_LIBERACAO}`]: formatDateTimeForBitrix(dataLiberacaoStart),
+        [`<=${CUSTOM_FIELDS.DATA_LIBERACAO}`]: formatDateTimeForBitrix(dataLiberacaoEnd),
+      };
+
+      const selectFields = ['ID', 'ASSIGNED_BY_ID'];
+
+      console.log('🔄 Iniciando busca de contatos ENVIADOS...');
+      const enviadosContacts = await this.fetchContactsByFilter(enviadosFilter, selectFields);
+      console.log(`✅ ${enviadosContacts.length} contatos ENVIADOS encontrados.`);
+
+      console.log('🔄 Iniciando busca de contatos LIBERADOS...');
+      const liberadosContacts = await this.fetchContactsByFilter(liberadosFilter, selectFields);
+      console.log(`✅ ${liberadosContacts.length} contatos LIBERADOS encontrados.`);
 
       const metrics: DashboardMetrics = {
-        totalEnviados: 0,
-        totalLiberados: 0,
+        totalEnviados: enviadosContacts.length,
+        totalLiberados: liberadosContacts.length,
         responsaveis: {}
       };
       for (const name of Object.keys(RESPONSIBLE_USERS)) {
         metrics.responsaveis[name] = { enviados: 0, liberados: 0 };
       }
-
       const responsibleUserIds = Object.entries(RESPONSIBLE_USERS).reduce((acc, [name, id]) => {
         acc[id.toString()] = name;
         return acc;
       }, {} as { [key: string]: string });
 
-      for (const contact of allContacts) {
-        // Checar Enviados
-        const envioDateStr = contact[CUSTOM_FIELDS.DATA_ENVIO];
-        const status = contact[CUSTOM_FIELDS.STATUS];
-
-        // Lógica de exclusão: conta se o status não estiver na lista de exclusão ou se estiver vazio
-        if (envioDateStr && (!status || !STATUS_VALUES.EXCLUIR_ENVIO.includes(status.trim()))) {
-          const datePart = envioDateStr.split('T')[0];
-          const envioDate = startOfDay(new Date(datePart.replace(/-/g, '/')));
-          
-          if (envioDate >= dataEnvioStart && envioDate <= dataEnvioEnd) {
-            metrics.totalEnviados++;
-            const responsibleName = responsibleUserIds[contact.ASSIGNED_BY_ID];
-            if (responsibleName && metrics.responsaveis[responsibleName]) {
-              metrics.responsaveis[responsibleName].enviados++;
-            }
-          }
-        }
-
-        // Checar Liberados
-        const liberacaoDateStr = contact[CUSTOM_FIELDS.DATA_LIBERACAO];
-        if (liberacaoDateStr) {
-          const datePart = liberacaoDateStr.split('T')[0];
-          const liberacaoDate = startOfDay(new Date(datePart.replace(/-/g, '/')));
-
-          if (liberacaoDate >= dataLiberacaoStart && liberacaoDate <= dataLiberacaoEnd) {
-            metrics.totalLiberados++;
-            const responsibleName = responsibleUserIds[contact.ASSIGNED_BY_ID];
-            if (responsibleName && metrics.responsaveis[responsibleName]) {
-              metrics.responsaveis[responsibleName].liberados++;
-            }
-          }
+      for (const contact of enviadosContacts) {
+        const responsibleName = responsibleUserIds[contact.ASSIGNED_BY_ID];
+        if (responsibleName && metrics.responsaveis[responsibleName]) {
+          metrics.responsaveis[responsibleName].enviados++;
         }
       }
 
-      console.log('📊 Métricas FINAIS calculadas manualmente:', metrics);
-      console.log('DEBUG V3: Lógica de exclusão de status em execução.'); // Prova de deploy
+      for (const contact of liberadosContacts) {
+        const responsibleName = responsibleUserIds[contact.ASSIGNED_BY_ID];
+        if (responsibleName && metrics.responsaveis[responsibleName]) {
+          metrics.responsaveis[responsibleName].liberados++;
+        }
+      }
+      
+      console.log('📊 Métricas FINAIS calculadas (server-side filter):', metrics);
       return metrics;
 
     } catch (error) {
@@ -105,7 +108,7 @@ class BitrixApiService {
     }
   }
 
-  private async fetchAllContactsWithPagination(): Promise<any[]> {
+  private async fetchContactsByFilter(filter: any, select: string[]): Promise<any[]> {
     const allContacts: any[] = [];
     let start = 0;
     const limit = 50;
@@ -115,19 +118,8 @@ class BitrixApiService {
       const response = await this.callBitrixMethod('crm.contact.list', {
         start: start,
         limit: limit,
-        filter: {
-          // Otimização: busca apenas contatos a partir de 01/06/2025.
-          'LOGIC': 'OR',
-          [`>=${CUSTOM_FIELDS.DATA_ENVIO}`]: '2025-06-01T00:00:00',
-          [`>=${CUSTOM_FIELDS.DATA_LIBERACAO}`]: '2025-06-01T00:00:00',
-        },
-        select: [
-          'ID',
-          'ASSIGNED_BY_ID',
-          CUSTOM_FIELDS.DATA_ENVIO,
-          CUSTOM_FIELDS.DATA_LIBERACAO,
-          CUSTOM_FIELDS.STATUS, // Adiciona o campo de status na busca
-        ],
+        filter: filter,
+        select: select,
       });
 
       const contacts = response.result || [];
@@ -148,17 +140,20 @@ class BitrixApiService {
     startDate: Date,
     endDate: Date
   ): Promise<ContactData[]> {
-    const allContacts = await this.fetchAllContactsWithPagination(); // Usa a busca otimizada
-    const filteredContacts = allContacts.filter(contact => {
-      const envioDateStr = contact[CUSTOM_FIELDS.DATA_ENVIO];
-      if (!envioDateStr) return false;
+    const filter = {
+      [`>=${CUSTOM_FIELDS.DATA_ENVIO}`]: formatDateTimeForBitrix(startDate),
+      [`<=${CUSTOM_FIELDS.DATA_ENVIO}`]: formatDateTimeForBitrix(endDate),
+    };
+    
+    const select = [
+      'ID',
+      'NAME',
+      'ASSIGNED_BY_ID',
+      CUSTOM_FIELDS.DATA_ENVIO,
+      CUSTOM_FIELDS.DATA_LIBERACAO,
+    ];
 
-      const datePart = envioDateStr.split('T')[0];
-      const envioDate = startOfDay(new Date(datePart.replace(/-/g, '/')));
-      
-      return envioDate >= startDate && envioDate <= endDate;
-    });
-    return filteredContacts;
+    return this.fetchContactsByFilter(filter, select);
   }
 
   private async callBitrixMethod(method: string, params: any = {}) {
