@@ -124,7 +124,6 @@ export default function Dashboard() {
           {responsaveis.map((responsavel, index) => {
             const dados = data.responsaveis[responsavel] || { enviados: 0, liberados: 0 };
             const cardColors = ['from-blue-50 to-blue-100 border-blue-200','from-purple-50 to-purple-100 border-purple-200','from-green-50 to-green-100 border-green-200','from-orange-50 to-orange-100 border-orange-200','from-pink-50 to-pink-100 border-pink-200'];
-            const avatarColors = ['bg-blue-500','bg-purple-500','bg-green-500','bg-orange-500','bg-pink-500'];
             const textColors = ['text-blue-800','text-purple-800','text-green-800','text-orange-800','text-pink-800'];
             return (
               <Card key={responsavel} className={`bg-gradient-to-br ${cardColors[index % cardColors.length]} shadow-md hover:shadow-lg transition-all duration-200`}>
