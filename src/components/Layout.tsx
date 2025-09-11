@@ -105,7 +105,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Main Content condicional para TV */}
       <main className={isDashboard 
-        ? "max-w-full mx-auto py-4 px-6 h-[calc(100vh-80px)] overflow-hidden" 
+        ? "max-w-full mx-auto h-[calc(100vh-80px)] overflow-hidden" 
         : "max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8"
       }>
         {children}
