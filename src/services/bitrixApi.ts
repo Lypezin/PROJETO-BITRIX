@@ -1,6 +1,6 @@
 // src/services/bitrixApi.ts
 import axios from 'axios';
-import { RESPONSIBLE_USERS, CUSTOM_FIELDS } from '../config/bitrix';
+import { RESPONSIBLE_USERS, CUSTOM_FIELDS, STATUS_VALUES } from '../config/bitrix';
 import { startOfDay } from 'date-fns';
 
 const RATE_LIMIT_MS = 500; // 2 chamadas por segundo
@@ -61,7 +61,9 @@ class BitrixApiService {
       for (const contact of allContacts) {
         // Checar Enviados
         const envioDateStr = contact[CUSTOM_FIELDS.DATA_ENVIO];
-        if (envioDateStr) {
+        const status = contact[CUSTOM_FIELDS.STATUS];
+
+        if (envioDateStr && status && STATUS_VALUES.ENVIADO.includes(status)) {
           const datePart = envioDateStr.split('T')[0];
           const envioDate = startOfDay(new Date(datePart.replace(/-/g, '/')));
           
@@ -122,6 +124,7 @@ class BitrixApiService {
           'ASSIGNED_BY_ID',
           CUSTOM_FIELDS.DATA_ENVIO,
           CUSTOM_FIELDS.DATA_LIBERACAO,
+          CUSTOM_FIELDS.STATUS, // Adiciona o campo de status na busca
         ],
       });
 
