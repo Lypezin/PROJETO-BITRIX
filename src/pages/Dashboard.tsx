@@ -122,10 +122,11 @@ export default function Dashboard() {
                 <CardContent className="flex-grow flex flex-col gap-1 min-h-0">
                   {/* Enviados */}
                   <div className="bg-white/70 backdrop-blur-sm rounded-md p-1.5 flex-1 flex flex-col">
-                    <div className="flex justify-between items-center mb-1">
+                    <div className="flex justify-between items-center">
                       <span className="text-xs font-semibold text-gray-600">Enviados</span>
-                      <span className={`text-sm font-bold ${textColors[index % textColors.length]}`}>{dados.totalEnviados}</span>
+                      <span className={`text-lg font-extrabold ${textColors[index % textColors.length]}`}>{dados.totalEnviados}</span>
                     </div>
+                    <div className="border-t border-gray-200/75 my-1"></div>
                     <div className="flex-1 overflow-y-auto">
                       <div className="space-y-0.5">
                         {Object.entries(dados.enviadosPorCidade).map(([cidade, count]: [string, any]) => (
@@ -139,10 +140,11 @@ export default function Dashboard() {
                   </div>
                   {/* Liberados */}
                   <div className="bg-white/70 backdrop-blur-sm rounded-md p-1.5 flex-1 flex flex-col">
-                    <div className="flex justify-between items-center mb-1">
+                    <div className="flex justify-between items-center">
                       <span className="text-xs font-semibold text-gray-600">Liberados</span>
-                      <span className={`text-sm font-bold ${textColors[index % textColors.length]}`}>{dados.totalLiberados}</span>
+                      <span className={`text-lg font-extrabold ${textColors[index % textColors.length]}`}>{dados.totalLiberados}</span>
                     </div>
+                    <div className="border-t border-gray-200/75 my-1"></div>
                     <div className="flex-1 overflow-y-auto">
                       <div className="space-y-0.5">
                         {Object.entries(dados.liberadosPorCidade).map(([cidade, count]: [string, any]) => (
