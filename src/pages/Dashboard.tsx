@@ -79,11 +79,11 @@ export default function Dashboard() {
       {/* Custo por Cidade com cores vibrantes */}
       {cityData && cityData.length > 0 && (
         <div className="flex-shrink-0">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center justify-center gap-2 mb-2">
             <div className="p-1.5 rounded-lg bg-orange-500 shadow-md"><MapPin className="h-4 w-4 text-white" /></div>
             <h2 className="text-sm font-semibold text-orange-800">Custo por Cidade</h2>
           </div>
-          <div className="grid grid-cols-6 gap-2">
+          <div className="grid grid-cols-6 gap-2 justify-center">
             {cityData.map((city) => {
               // Garante que o valor seja tratado como número, substituindo vírgula por ponto
               const value = parseFloat(city.value.replace(',', '.'));
