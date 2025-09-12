@@ -84,14 +84,20 @@ export default function Dashboard() {
             <h2 className="text-sm font-semibold text-orange-800">Custo por Cidade</h2>
           </div>
           <div className="grid grid-cols-6 gap-2">
-            {cityData.map((city) => (
-              <Card key={city.id} className="bg-gradient-to-br from-orange-50 to-amber-100 border border-orange-200 shadow-sm">
-                <CardContent className="p-2 text-center">
-                  <p className="text-xs font-bold text-orange-900 mb-1 truncate">{city.name}</p>
-                  <p className="text-base font-bold text-orange-800">R$ {city.value}</p>
-                </CardContent>
-              </Card>
-            ))}
+            {cityData.map((city) => {
+              // Garante que o valor seja tratado como número, substituindo vírgula por ponto
+              const value = parseFloat(city.value.replace(',', '.'));
+              const valueColor = value >= 50 ? 'text-red-600' : 'text-green-600';
+
+              return (
+                <Card key={city.id} className="bg-gradient-to-br from-orange-50 to-amber-100 border border-orange-200 shadow-sm">
+                  <CardContent className="p-2 text-center">
+                    <p className="text-xs font-bold text-orange-900 mb-1 truncate">{city.name}</p>
+                    <p className={`text-base font-bold ${valueColor}`}>R$ {city.value}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       )}
