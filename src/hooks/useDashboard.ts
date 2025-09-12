@@ -14,11 +14,13 @@ export const useDashboard = () => {
     isLoading, 
     lastUpdate,
     cityData,
+    goal, // Novo estado
     setData, 
     setFilters: setLocalFilters, // Renomeia para evitar conflito
     setLoading, 
     updateLastUpdate,
-    setCityData
+    setCityData,
+    setGoal: setLocalGoal // Nova ação
   } = useDashboardStore();
 
   // Função para salvar filtros no Firebase
@@ -38,6 +40,12 @@ export const useDashboard = () => {
 
     set(filtersRef, filtersToSave);
   }, [filters]);
+
+  // Função para salvar a meta no Firebase
+  const setGoal = useCallback((newGoal: number) => {
+    const goalRef = ref(database, 'metas/liberados');
+    set(goalRef, newGoal);
+  }, []);
 
   // Efeito para ouvir mudanças nos filtros do Firebase
   useEffect(() => {
@@ -80,6 +88,22 @@ export const useDashboard = () => {
 
     return () => unsubscribe();
   }, [setCityData]);
+
+  // Efeito para ouvir mudanças na meta do Firebase
+  useEffect(() => {
+    const goalRef = ref(database, 'metas/liberados');
+    const unsubscribe = onValue(goalRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data !== null) {
+        setLocalGoal(data);
+      } else {
+        setLocalGoal(0); // Valor padrão
+      }
+    });
+
+    return () => unsubscribe();
+  }, [setLocalGoal]);
+
 
   const addCity = (name: string, value: string) => {
     if (!name.trim() || !value.trim()) return;
@@ -139,9 +163,11 @@ export const useDashboard = () => {
     isLoading,
     lastUpdate,
     cityData,
+    goal, // Exporta o novo estado
     setFilters,
     fetchData,
     addCity,
     removeCity,
+    setGoal, // Exporta a nova função
   };
 };
