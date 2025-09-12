@@ -94,6 +94,11 @@ export default function Dashboard() {
                   <CardContent className="p-2 text-center">
                     <p className="text-xs font-bold text-orange-900 mb-1 truncate">{city.name}</p>
                     <p className={`text-base font-bold ${valueColor}`}>R$ {city.value}</p>
+                    {city.remaining !== undefined && city.remaining > 0 && (
+                      <p className="text-xs font-semibold text-blue-600 mt-1">
+                        Faltam: {city.remaining}
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               );
