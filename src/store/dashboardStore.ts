@@ -25,6 +25,7 @@ export interface CityData {
   id: string;
   name: string;
   value: string;
+  remaining?: number; // Campo para "quantos faltam"
 }
 
 interface DashboardStore {
@@ -33,7 +34,6 @@ interface DashboardStore {
   isLoading: boolean;
   lastUpdate: Date | null;
   cityData: CityData[];
-  goal: number; // Novo estado para meta
   
   // Actions
   setData: (data: DashboardData) => void;
@@ -42,7 +42,6 @@ interface DashboardStore {
   resetFilters: () => void;
   updateLastUpdate: () => void;
   setCityData: (cities: CityData[]) => void;
-  setGoal: (goal: number) => void; // Nova ação para meta
 }
 
 const today = new Date();
@@ -68,7 +67,6 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
   isLoading: false,
   lastUpdate: null,
   cityData: [],
-  goal: 0, // Valor inicial da meta
 
   setData: (data) => set({ data }),
   setFilters: (newFilters) => set((state) => ({
@@ -86,5 +84,4 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
   })),
   updateLastUpdate: () => set({ lastUpdate: new Date() }),
   setCityData: (cities) => set({ cityData: cities }),
-  setGoal: (goal) => set({ goal }), // Implementação da ação
 }));

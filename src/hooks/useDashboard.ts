@@ -4,7 +4,7 @@ import { useEffect, useCallback } from 'react';
 import { useDashboardStore } from '../store/dashboardStore';
 import { bitrixApi } from '../services/bitrixApi';
 import { database } from '../config/firebase';
-import { ref, onValue, set, push, remove } from "firebase/database";
+import { ref, onValue, set, push, remove, update } from "firebase/database"; // Import 'update'
 import { DashboardFilters, CityData } from '../store/dashboardStore';
 
 export const useDashboard = () => {
@@ -14,13 +14,11 @@ export const useDashboard = () => {
     isLoading, 
     lastUpdate,
     cityData,
-    goal, // Novo estado
     setData, 
     setFilters: setLocalFilters, // Renomeia para evitar conflito
     setLoading, 
     updateLastUpdate,
     setCityData,
-    setGoal: setLocalGoal // Nova ação
   } = useDashboardStore();
 
   // Função para salvar filtros no Firebase
@@ -40,12 +38,6 @@ export const useDashboard = () => {
 
     set(filtersRef, filtersToSave);
   }, [filters]);
-
-  // Função para salvar a meta no Firebase
-  const setGoal = useCallback((newGoal: number) => {
-    const goalRef = ref(database, 'metas/liberados');
-    set(goalRef, newGoal);
-  }, []);
 
   // Efeito para ouvir mudanças nos filtros do Firebase
   useEffect(() => {
@@ -89,32 +81,24 @@ export const useDashboard = () => {
     return () => unsubscribe();
   }, [setCityData]);
 
-  // Efeito para ouvir mudanças na meta do Firebase
-  useEffect(() => {
-    const goalRef = ref(database, 'metas/liberados');
-    const unsubscribe = onValue(goalRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data !== null) {
-        setLocalGoal(data);
-      } else {
-        setLocalGoal(0); // Valor padrão
-      }
-    });
-
-    return () => unsubscribe();
-  }, [setLocalGoal]);
-
-
   const addCity = (name: string, value: string) => {
     if (!name.trim() || !value.trim()) return;
     const citiesRef = ref(database, 'cities');
     const newCityRef = push(citiesRef);
-    set(newCityRef, { name, value });
+    set(newCityRef, { name, value, remaining: 0 }); // Inicia 'remaining' com 0
   };
 
   const removeCity = (id: string) => {
     const cityRef = ref(database, `cities/${id}`);
     remove(cityRef);
+  };
+
+  // Nova função para atualizar o valor 'remaining' de uma cidade
+  const updateCityRemaining = (id: string, remaining: number) => {
+    if (id && remaining >= 0) {
+      const cityRef = ref(database, `cities/${id}`);
+      update(cityRef, { remaining });
+    }
   };
 
   const fetchData = useCallback(async () => {
@@ -163,11 +147,10 @@ export const useDashboard = () => {
     isLoading,
     lastUpdate,
     cityData,
-    goal, // Exporta o novo estado
     setFilters,
     fetchData,
     addCity,
     removeCity,
-    setGoal, // Exporta a nova função
+    updateCityRemaining, // Exporta a nova função
   };
 };

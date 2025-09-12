@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { useDashboard } from '../hooks/useDashboard';
 import { format, startOfDay, endOfDay } from 'date-fns';
-import { Filter, Settings2, Calendar, Zap, PlusCircle, Trash2, Map, Target } from 'lucide-react';
+import { Filter, Settings2, Calendar, Zap, PlusCircle, Trash2, Map, Save } from 'lucide-react';
 
 export default function Admin() {
   const { 
@@ -12,8 +12,7 @@ export default function Admin() {
     cityData, 
     addCity, 
     removeCity,
-    goal,
-    setGoal
+    updateCityRemaining
   } = useDashboard();
   
   const [dataEnvioRange, setDataEnvioRange] = useState({
@@ -26,12 +25,17 @@ export default function Admin() {
   });
   const [cityName, setCityName] = useState('');
   const [cityValue, setCityValue] = useState('');
-  const [currentGoal, setCurrentGoal] = useState(goal);
+  const [remainingInputs, setRemainingInputs] = useState<{ [key: string]: string }>({});
 
-  // Sincroniza o estado local quando a meta do hook mudar
+  // Efeito para inicializar os inputs com os valores do Firebase
   useEffect(() => {
-    setCurrentGoal(goal);
-  }, [goal]);
+    const initialInputs: { [key: string]: string } = {};
+    cityData.forEach(city => {
+      initialInputs[city.id] = city.remaining?.toString() || '0';
+    });
+    setRemainingInputs(initialInputs);
+  }, [cityData]);
+
 
   const handleApplyFilters = () => {
     setFilters({
@@ -49,17 +53,18 @@ export default function Admin() {
     setCityValue('');
   };
 
-  const handleGoalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const handleRemainingChange = (cityId: string, value: string) => {
     // Permite campo vazio ou números
     if (value === '' || /^[0-9\b]+$/.test(value)) {
-      setCurrentGoal(Number(value));
+      setRemainingInputs(prev => ({ ...prev, [cityId]: value }));
     }
   };
 
-  const handleSetGoal = () => {
-    setGoal(currentGoal);
+  const handleUpdateRemaining = (cityId: string) => {
+    const value = remainingInputs[cityId];
+    updateCityRemaining(cityId, Number(value));
   };
+
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6 bg-gray-50/50">
@@ -71,16 +76,16 @@ export default function Admin() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Painel de Administração</h1>
-            <p className="text-gray-600">Ajuste os filtros, gerencie custos e defina metas para o dashboard.</p>
+            <p className="text-gray-600">Ajuste os filtros e gerencie os custos e metas por cidade.</p>
           </div>
         </div>
       </div>
 
       {/* Main Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Coluna da Esquerda (Filtros) */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-1">
           <Card className="shadow-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-800">
@@ -148,40 +153,14 @@ export default function Admin() {
           </Card>
         </div>
 
-        {/* Coluna da Direita (Metas e Cidades) */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Metas de Performance */}
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-800">
-                <Target className="h-5 w-5 text-green-600" />
-                Metas de Performance
-              </CardTitle>
-              <p className="text-sm text-gray-500 pt-1">Defina a meta de liberados para o período.</p>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-3">
-                <input
-                  type="text"
-                  placeholder="Ex: 50"
-                  value={currentGoal || ''}
-                  onChange={handleGoalChange}
-                  className="flex-grow w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-                <Button onClick={handleSetGoal} className="bg-green-600 hover:bg-green-700 text-white">
-                  <Target className="h-4 w-4 mr-2" />
-                  Definir Meta
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-          
+        {/* Coluna da Direita (Cidades) */}
+        <div className="lg:col-span-1">
           {/* Gerenciador de Custos por Cidade */}
           <Card className="shadow-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-800">
                 <Map className="h-5 w-5 text-orange-600" />
-                Gerenciar Custos por Cidade
+                Gerenciar Cidades
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -192,22 +171,39 @@ export default function Admin() {
                 </div>
                 <Button onClick={handleAddCity} className="w-full bg-orange-600 hover:bg-orange-700 text-white">
                   <PlusCircle className="h-4 w-4 mr-2" />
-                  Adicionar Custo
+                  Adicionar Cidade
                 </Button>
               </div>
 
-              <div className="mt-5 space-y-2">
-                {cityData.length > 0 && cityData.map(city => (
-                  <div key={city.id} className="flex justify-between items-center bg-gray-50 p-2.5 rounded-md border">
-                    <div>
-                      <span className="font-medium text-gray-800">{city.name}</span>
-                      <span className="text-gray-600">: R$ {city.value}</span>
+              <div className="mt-5 space-y-3">
+                <h4 className="text-sm font-semibold text-gray-700 border-t pt-4">Cidades Atuais</h4>
+                {cityData.length > 0 ? cityData.map(city => (
+                  <div key={city.id} className="bg-gray-50 p-3 rounded-md border space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="font-medium text-gray-800">{city.name}</span>
+                        <span className="text-gray-600">: R$ {city.value}</span>
+                      </div>
+                      <Button variant="ghost" size="icon" onClick={() => removeCity(city.id)} className="text-red-500 hover:bg-red-100 h-8 w-8">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => removeCity(city.id)} className="text-red-500 hover:bg-red-100 h-8 w-8">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm font-medium text-gray-600 whitespace-nowrap">Faltam:</label>
+                      <input 
+                        type="text" 
+                        value={remainingInputs[city.id] || ''}
+                        onChange={(e) => handleRemainingChange(city.id, e.target.value)}
+                        className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 text-sm"
+                      />
+                      <Button size="sm" onClick={() => handleUpdateRemaining(city.id)} className="bg-green-600 hover:bg-green-700 text-white px-3">
+                        <Save className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-sm text-gray-500 text-center py-4">Nenhuma cidade adicionada.</p>
+                )}
               </div>
             </CardContent>
           </Card>
