@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { useDashboard } from '../hooks/useDashboard';
@@ -29,7 +29,7 @@ export default function Admin() {
   const [currentGoal, setCurrentGoal] = useState(goal);
 
   // Sincroniza o estado local quando a meta do hook mudar
-  useState(() => {
+  useEffect(() => {
     setCurrentGoal(goal);
   }, [goal]);
 
