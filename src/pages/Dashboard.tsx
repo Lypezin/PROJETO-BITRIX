@@ -104,7 +104,7 @@ export default function Dashboard() {
 
       {/* Performance por Responsável com gradientes coloridos */}
       <div className="flex-grow flex flex-col min-h-0">
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center justify-center gap-2 mb-2">
           <div className="p-1.5 rounded-lg bg-purple-500 shadow-md"><Award className="h-4 w-4 text-white" /></div>
           <h2 className="text-sm font-semibold text-purple-800">Performance por Responsável</h2>
         </div>
